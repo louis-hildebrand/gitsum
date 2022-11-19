@@ -72,6 +72,7 @@ def _get_status(repo: Repository, name: str) -> RepoStatus:
 def main():
     cwd = os.getcwd()
     repos = _get_git_repos(cwd)
+    print(f"Found {len(repos)} Git repositories.")
     statuses = [_get_status(r, _get_short_name(r)) for r in repos]
     name_width = max([len(s._name) for s in statuses])
     head_width = max([len(s._branch) for s in statuses])
