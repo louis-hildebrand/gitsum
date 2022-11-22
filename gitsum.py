@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+
+
+from dataclasses import dataclass
 from pygit2 import Repository
 from typing import TypeVar
 import os
@@ -7,48 +11,66 @@ import pygit2
 T = TypeVar("T")
 
 
+@dataclass
 class RepoStatus:
-    def __init__(self, name: str, branch: str, is_local: bool, has_changes: bool, branch_has_upstream: bool, local_ahead: int, local_behind: int):
-        self._name = name
-        self._branch = branch
-        self._has_changes = has_changes
-        self._is_local = is_local
-        self._branch_has_upstream = branch_has_upstream
-        self._local_ahead = local_ahead
-        self._local_behind = local_behind
+    name: str
+    head: str
+    is_local: bool
+    has_changes: bool
+    branch_has_upstream: bool
+    local_ahead: int
+    local_behind: int
+
+    def is_up_to_date(self) -> bool:
+        return not self.has_changes and (
+            not self.branch_has_upstream or (
+                self.local_ahead == 0 and self.local_behind == 0
+            )
+        )
 
     def to_string(self, name_width: int, head_width: int) -> str:
-        is_up_to_date = not self._has_changes
-        return f"{' ' if is_up_to_date else '!'}  {self._name:<{name_width}}  {'[LR]' if self._is_local else '[LB]' if not self._branch_has_upstream else '    '}  {self._branch:<{head_width}} {' *' if self._has_changes else '  '}{f' >{self._local_ahead}' if self._local_ahead > 0 else '   '}{f' <{self._local_behind}' if self._local_behind > 0 else '   '}"
+        return f"{'!' if not self.is_up_to_date() else ' '}  {self.name:<{name_width}}  {'[LR]' if self.is_local else '[LB]' if not self.branch_has_upstream else '    '}  {self.head:<{head_width}} {' *' if self.has_changes else '  '}{f' >{self.local_ahead}' if self.local_ahead > 0 else '   '}{f' <{self.local_behind}' if self.local_behind > 0 else '   '}"
+
+    def __str__(self) -> str:
+        return self.to_string(0, 0)
 
 
-def _flatten(l: list[list[T]]) -> list[T]:
-    return [x for sublist in l for x in sublist]
-
-
-def _get_git_repos(dir: str) -> list[Repository]:
-    """
-    Recursively searches for git repos starting in (and including) the given directory.
-    """
-    # TODO: Why???
-    if "Special Characters" in dir:
-        return []
-    if not os.path.isdir(dir):
-        return []
-    repo_path = pygit2.discover_repository(dir)
-    if repo_path:
-        return [Repository(repo_path)]
-    return _flatten([_get_git_repos(os.path.join(dir, subdir)) for subdir in os.listdir(dir)])
-
-
-def _get_short_name(repo: Repository) -> str:
-    name = repo.path[len(os.getcwd())+1:-6]
+def _truncate_path(path: str) -> str:
+    name = path[len(os.getcwd())+1:-6]
     if not name:
         name = "."
     return name
 
 
-def _get_status(repo: Repository, name: str) -> RepoStatus:
+def _do_get_git_repos(dir: str, max_path_len: int) -> tuple[list[Repository], int]:
+    """
+    Recursively searches for git repos starting in (and including) the given directory.
+    """
+    trunc_dir = _truncate_path(dir)
+    max_path_len = max(len(trunc_dir), max_path_len)
+    print(f"Scanning {trunc_dir + '.':<{max_path_len+1}}", end="\r")
+    # TODO: Why???
+    if "Special Characters" in dir:
+        return ([], max_path_len)
+    if not os.path.isdir(dir):
+        return ([], max_path_len)
+    repo_path = pygit2.discover_repository(dir)
+    if repo_path:
+        return ([Repository(repo_path)], max_path_len)
+    repos: list[Repository] = []
+    for subdir in os.listdir(dir):
+        (new_repos, max_path_len) = _do_get_git_repos(os.path.join(dir, subdir), max_path_len)
+        repos += new_repos
+    return (repos, max_path_len)
+
+
+def _get_git_repos(dir: str) -> list[Repository]:
+    (repos, max_path_len) = _do_get_git_repos(dir, 0)
+    print(" " * (len("Scanning .") + max_path_len), end="\r")
+    return repos
+
+
+def get_status(repo: Repository, name: str) -> RepoStatus:
     branch_has_upstream = False
     (local_ahead, local_behind) = (0, 0)
     if repo.head_is_unborn:
@@ -72,10 +94,11 @@ def _get_status(repo: Repository, name: str) -> RepoStatus:
 def main():
     cwd = os.getcwd()
     repos = _get_git_repos(cwd)
+    print(" " * 100, end="\r")
     print(f"Found {len(repos)} Git repositories.")
-    statuses = [_get_status(r, _get_short_name(r)) for r in repos]
-    name_width = max([len(s._name) for s in statuses])
-    head_width = max([len(s._branch) for s in statuses])
+    statuses = [get_status(r, _truncate_path(r.path)) for r in repos]
+    name_width = max([len(s.name) for s in statuses])
+    head_width = max([len(s.head) for s in statuses])
     [print(s.to_string(name_width, head_width)) for s in statuses]
 
 
