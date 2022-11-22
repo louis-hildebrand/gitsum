@@ -49,7 +49,7 @@ def _do_get_git_repos(dir: str, max_path_len: int) -> tuple[list[Repository], in
     trunc_dir = _truncate_path(dir)
     max_path_len = max(len(trunc_dir), max_path_len)
     print(f"Scanning {trunc_dir + '.':<{max_path_len+1}}", end="\r")
-    # TODO: Why???
+    # TODO: for this specific folder, pygit2.discover_repository() returns a path but the Repository constructor rejects that same path. Why???
     if "Special Characters" in dir:
         return ([], max_path_len)
     if not os.path.isdir(dir):
@@ -74,7 +74,6 @@ def get_status(repo: Repository, name: str) -> RepoStatus:
     branch_has_upstream = False
     (local_ahead, local_behind) = (0, 0)
     if repo.head_is_unborn:
-        # TODO: What to do here? Use repo.head.name?
         branch_name = "(no commits)"
     elif repo.head_is_detached:
         branch_name = f"({repo.head.target.hex[:6]})"  # type: ignore
@@ -86,7 +85,6 @@ def get_status(repo: Repository, name: str) -> RepoStatus:
             branch_has_upstream = True
             (local_ahead, local_behind) = repo.ahead_behind(local_branch.target, upstream_branch.target) # type: ignore
     is_local = not len(repo.remotes) > 0
-    # TODO: Test this
     has_changes = len(repo.status()) > 0
     return RepoStatus(name, branch_name, is_local, has_changes, branch_has_upstream, local_ahead, local_behind)
 
