@@ -2,10 +2,10 @@
 
 
 from dataclasses import dataclass
-from pygit2 import Repository
+from pygit2 import Repository  # type: ignore
 from typing import TypeVar
 import os
-import pygit2
+import pygit2  # type: ignore
 
 
 T = TypeVar("T")
@@ -42,32 +42,23 @@ def _truncate_path(path: str) -> str:
     return name
 
 
-def _do_get_git_repos(dir: str, max_path_len: int) -> tuple[list[Repository], int]:
-    """
-    Recursively searches for git repos starting in (and including) the given directory.
-    """
-    trunc_dir = _truncate_path(dir)
-    max_path_len = max(len(trunc_dir), max_path_len)
-    print(f"Scanning {trunc_dir + '.':<{max_path_len+1}}", end="\r")
-    # TODO: for this specific folder, pygit2.discover_repository() returns a path but the Repository constructor rejects that same path. Why???
-    if "Special Characters" in dir:
-        return ([], max_path_len)
-    if not os.path.isdir(dir):
-        return ([], max_path_len)
-    repo_path = pygit2.discover_repository(dir)
-    if repo_path:
-        return ([Repository(repo_path)], max_path_len)
-    repos: list[Repository] = []
-    for subdir in os.listdir(dir):
-        (new_repos, max_path_len) = _do_get_git_repos(os.path.join(dir, subdir), max_path_len)
-        repos += new_repos
-    return (repos, max_path_len)
+def _flatten(l: list[list[T]]) -> list[T]:
+    return [x for sublist in l for x in sublist]
 
 
 def _get_git_repos(dir: str) -> list[Repository]:
-    (repos, max_path_len) = _do_get_git_repos(dir, 0)
-    print(" " * (len("Scanning .") + max_path_len), end="\r")
-    return repos
+    """
+    Recursively searches for git repos starting in (and including) the given directory.
+    """
+    # TODO: Why???
+    if "Special Characters" in dir:
+        return []
+    if not os.path.isdir(dir):
+        return []
+    repo_path = pygit2.discover_repository(dir)
+    if repo_path:
+        return [Repository(repo_path)]
+    return _flatten([_get_git_repos(os.path.join(dir, subdir)) for subdir in os.listdir(dir)])
 
 
 def get_status(repo: Repository, name: str) -> RepoStatus:
@@ -92,7 +83,6 @@ def get_status(repo: Repository, name: str) -> RepoStatus:
 def main():
     cwd = os.getcwd()
     repos = _get_git_repos(cwd)
-    print(" " * 100, end="\r")
     print(f"Found {len(repos)} Git repositories.")
     statuses = [get_status(r, _truncate_path(r.path)) for r in repos]
     name_width = max([len(s.name) for s in statuses])
