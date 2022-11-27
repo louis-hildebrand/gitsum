@@ -2,8 +2,9 @@
 
 
 from dataclasses import dataclass
-from pygit2 import Repository  # type: ignore
+from pygit2 import Remote, Repository  # type: ignore
 from typing import TypeVar
+import argparse
 import os
 import pygit2  # type: ignore
 
@@ -61,7 +62,15 @@ def _get_git_repos(dir: str) -> list[Repository]:
     return _flatten([_get_git_repos(os.path.join(dir, subdir)) for subdir in os.listdir(dir)])
 
 
-def get_status(repo: Repository, name: str) -> RepoStatus:
+def _try_fetch(remote: Remote, repo_name: str) -> None:
+    try:
+        remote.fetch()  # type: ignore
+    except pygit2.GitError:
+        # TODO: Check credentials? Skip?
+        print(f"WARN: Failed to fetch repo '{repo_name}'")
+
+
+def get_status(repo: Repository, name: str, fetch: bool) -> RepoStatus:
     branch_has_upstream = False
     (local_ahead, local_behind) = (0, 0)
     if repo.head_is_unborn:
@@ -74,20 +83,33 @@ def get_status(repo: Repository, name: str) -> RepoStatus:
         upstream_branch = local_branch.upstream
         if upstream_branch:
             branch_has_upstream = True
+            if fetch:
+                remote = repo.remotes[upstream_branch.remote_name]
+                _try_fetch(remote, name)
             (local_ahead, local_behind) = repo.ahead_behind(local_branch.target, upstream_branch.target) # type: ignore
     is_local = not len(repo.remotes) > 0
     has_changes = len(repo.status()) > 0
     return RepoStatus(name, branch_name, is_local, has_changes, branch_has_upstream, local_ahead, local_behind)
 
 
-def main():
+def get_git_summary(fetch: bool) -> None:
     cwd = os.getcwd()
     repos = _get_git_repos(cwd)
     print(f"Found {len(repos)} Git repositories.")
-    statuses = [get_status(r, _truncate_path(r.path)) for r in repos]
+    statuses = [get_status(r, _truncate_path(r.path), fetch) for r in repos]
     name_width = max([len(s.name) for s in statuses])
     head_width = max([len(s.head) for s in statuses])
     [print(s.to_string(name_width, head_width)) for s in statuses]
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        prog="gitsum",
+        description="View a summary of statuses for multiple Git repositories."
+    )
+    parser.add_argument("-f", "--fetch", action="store_true", help="fetch before getting status")
+    args = parser.parse_args()
+    get_git_summary(args.fetch)
 
 
 if __name__ == "__main__":
