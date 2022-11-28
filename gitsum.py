@@ -36,8 +36,10 @@ class RepoStatus:
         return self.to_string(0, 0)
 
 
-def _truncate_path(path: str) -> str:
-    name = path[len(os.getcwd())+1:-6]
+def _truncate_path(path: str, remove_git_dir: bool = False) -> str:
+    name = path[len(os.getcwd())+1:]
+    if name.endswith("/.git/") or name.endswith("\\.git\\"):
+        name = name[:-6]
     if not name:
         name = "."
     return name
@@ -47,19 +49,35 @@ def _flatten(l: list[list[T]]) -> list[T]:
     return [x for sublist in l for x in sublist]
 
 
-def _get_git_repos(dir: str) -> list[Repository]:
+def _do_get_git_repos(dir: str) -> tuple[list[Repository], list[str]]:
+    # TODO: for this specific folder, pygit2.discover_repository() returns a path but the Repository constructor rejects that same path. Why???
+    if "Special Characters" in dir:
+        return ([], [])
+    if not os.path.isdir(dir):
+        return ([], [dir])
+    repo_path = pygit2.discover_repository(dir)
+    if repo_path:
+        return ([Repository(repo_path)], [])
+    results = [_do_get_git_repos(os.path.join(dir, subdir)) for subdir in os.listdir(dir)]
+    # If there are no Git repos within this directory, just say that this entire directory is an outside file
+    repos = _flatten([repos for (repos, _) in results])
+    outside_files = _flatten([outside_files for (_, outside_files) in results])
+    if len(repos) != 0:
+        return (repos, outside_files)
+    else:
+        return (repos, [dir])
+
+
+def _get_git_repos(dir: str, list_outside_files: bool) -> list[Repository]:
     """
     Recursively searches for git repos starting in (and including) the given directory.
     """
-    # TODO: Why???
-    if "Special Characters" in dir:
-        return []
-    if not os.path.isdir(dir):
-        return []
-    repo_path = pygit2.discover_repository(dir)
-    if repo_path:
-        return [Repository(repo_path)]
-    return _flatten([_get_git_repos(os.path.join(dir, subdir)) for subdir in os.listdir(dir)])
+    (repos, outside_files) = _do_get_git_repos(dir)
+    if list_outside_files:
+        outside_files.sort()
+        for f in outside_files:
+            print(f"OUTSIDE: {_truncate_path(f)}")
+    return repos
 
 
 def _try_fetch(remote: Remote, repo_name: str) -> None:
@@ -92,11 +110,11 @@ def get_status(repo: Repository, name: str, fetch: bool) -> RepoStatus:
     return RepoStatus(name, branch_name, is_local, has_changes, branch_has_upstream, local_ahead, local_behind)
 
 
-def get_git_summary(fetch: bool) -> None:
+def get_git_summary(fetch: bool, list_outside_files: bool) -> None:
     cwd = os.getcwd()
-    repos = _get_git_repos(cwd)
+    repos = _get_git_repos(cwd, list_outside_files)
     print(f"Found {len(repos)} Git repositories.")
-    statuses = [get_status(r, _truncate_path(r.path), fetch) for r in repos]
+    statuses = [get_status(r, _truncate_path(r.path, True), fetch) for r in repos]
     name_width = max([len(s.name) for s in statuses])
     head_width = max([len(s.head) for s in statuses])
     [print(s.to_string(name_width, head_width)) for s in statuses]
@@ -108,8 +126,9 @@ def main() -> None:
         description="View a summary of statuses for multiple Git repositories."
     )
     parser.add_argument("-f", "--fetch", action="store_true", help="fetch before getting status")
+    parser.add_argument("-o", "--outside-files", action="store_true", help="list files and directories that are not inside a Git repository")
     args = parser.parse_args()
-    get_git_summary(args.fetch)
+    get_git_summary(args.fetch, args.outside_files)
 
 
 if __name__ == "__main__":
