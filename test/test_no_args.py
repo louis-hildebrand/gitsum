@@ -18,17 +18,17 @@ class NoArgsTests(BaseTestCase):
 
         expected_output = _EXPECTED_OUTPUT.replace("MODIFIED_REPO_COMMIT_HASH", common.MODIFIED_REPO_COMMIT_HASH)
 
-        print(common.actual_expected(result_str, expected_output))
+        actual_expected = common.actual_expected(result_str, expected_output)
 
         result_lines = [line.rstrip() for line in result_str.splitlines()]
         expected_lines = [line.rstrip() for line in expected_output.splitlines()]
 
         # Check number of lines
-        self.assertEqual(len(expected_lines), len(result_lines))
+        self.assertEqual(len(expected_lines), len(result_lines), actual_expected)
 
         # Check line contents
         for (expected, actual) in zip(expected_lines, result_lines):
-            self.assertEqual(expected, actual)
+            self.assertEqual(expected, actual, actual_expected)
 
     def test_no_args(self) -> None:
         common.run_test(self._do_test_no_args)

@@ -2,10 +2,10 @@ from test.base_test_case import BaseTestCase
 import test.common as common
 
 
-_EXPECTED_FILES = """OUTSIDE: all-outside
+_EXPECTED_FILES = """OUTSIDE: all-outside/
 OUTSIDE: outside.txt
-OUTSIDE: remote/all-outside
-OUTSIDE: remote/empty-outside
+OUTSIDE: remote/all-outside/
+OUTSIDE: remote/empty-outside/
 OUTSIDE: remote/outside.txt"""
 
 _EXPECTED_REPOS = """Found 7 Git repositories.
@@ -26,17 +26,17 @@ class OutsideFileTests(BaseTestCase):
 
         expected_output = _EXPECTED_COMBINED.replace("MODIFIED_REPO_COMMIT_HASH", common.MODIFIED_REPO_COMMIT_HASH)
 
-        print(common.actual_expected(result_str, expected_output))
+        actual_expected = common.actual_expected(result_str, expected_output)
 
         result_lines = [line.rstrip() for line in result_str.splitlines()]
         expected_lines = [line.rstrip() for line in expected_output.splitlines()]
 
         # Check number of lines
-        self.assertEqual(len(expected_lines), len(result_lines))
+        self.assertEqual(len(expected_lines), len(result_lines), actual_expected)
 
         # Check line contents
         for (expected, actual) in zip(expected_lines, result_lines):
-            self.assertEqual(expected, actual)
+            self.assertEqual(expected, actual, actual_expected)
 
     def test_outside_files(self) -> None:
         common.run_test(self._do_test_outside_files)
@@ -46,17 +46,17 @@ class OutsideFileTests(BaseTestCase):
 
         expected_output = _EXPECTED_FILES.replace("MODIFIED_REPO_COMMIT_HASH", common.MODIFIED_REPO_COMMIT_HASH)
 
-        print(common.actual_expected(result_str, expected_output))
+        actual_expected = common.actual_expected(result_str, expected_output)
 
         result_lines = [line.rstrip() for line in result_str.splitlines()]
         expected_lines = [line.rstrip() for line in expected_output.splitlines()]
 
         # Check number of lines
-        self.assertEqual(len(expected_lines), len(result_lines))
+        self.assertEqual(len(expected_lines), len(result_lines), actual_expected)
 
         # Check line contents
         for (expected, actual) in zip(expected_lines, result_lines):
-            self.assertEqual(expected, actual)
+            self.assertEqual(expected, actual, actual_expected)
 
     def test_only_outside_files(self) -> None:
         common.run_test(self._do_test_only_outside_files)

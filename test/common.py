@@ -231,6 +231,7 @@ def _set_up_remote_ahead_behind() -> None:
 
 
 def _set_up_outside_files() -> None:
+    print("Setting up outside files")
     os.makedirs("all-outside")
     _create_file("all-outside/hello.txt")
     _create_file("all-outside/general-kenobi.txt")
@@ -288,6 +289,8 @@ def _shared_setup() -> None:
     _set_up_remote_ahead_behind()
 
     _set_up_outside_files()
+
+    print()
 
     os.chdir(_working_dir)
 
