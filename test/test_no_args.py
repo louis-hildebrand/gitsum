@@ -16,7 +16,7 @@ class NoArgsTests(BaseTestCase):
     def _do_test_no_args(self):
         result_str = common.run_gitsum([])
 
-        expected_output = _EXPECTED_OUTPUT.replace("MODIFIED_REPO_COMMIT_HASH", common.MODIFIED_REPO_COMMIT_HASH)
+        expected_output = _EXPECTED_OUTPUT.replace("MODIFIED_REPO_COMMIT_HASH", common.modified_repo_commit_hash)
 
         actual_expected = common.actual_expected(result_str, expected_output)
 

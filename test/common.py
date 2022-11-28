@@ -1,4 +1,3 @@
-from shutil import rmtree
 from typing import Callable
 import os
 import pygit2  # type: ignore
@@ -13,7 +12,7 @@ _setup_complete = False
 _old_repo_path = None
 _new_repo_path = None
 
-MODIFIED_REPO_COMMIT_HASH: str = "MODIFIED_REPO_COMMIT_HASH"
+modified_repo_commit_hash: str = "MODIFIED_REPO_COMMIT_HASH"
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -119,13 +118,8 @@ def _overwrite_file(filename: str, text: str) -> None:
 # Set up: repo creation
 # ----------------------------------------------------------------------------------------------------------------------
 def _set_up_directory_structure() -> None:
-    print("Setting up directory structure...")
+    print("Setting up directory structure")
     os.chdir("test")
-    if os.path.exists("test-repos"):
-        try:
-            rmtree("test-repos")
-        except:
-            raise RuntimeError("Please delete 'test/test-repos/' before running the integration tests")
     os.makedirs("test-repos")
     os.chdir("test-repos")
     os.makedirs("remote/not empty")
@@ -152,7 +146,6 @@ def _set_up_deleted() -> None:
 
 
 def _set_up_modified() -> None:
-    global MODIFIED_REPO_COMMIT_HASH
     print("Setting up repo 'modified'")
     _git_init("modified")
     os.chdir("modified")
@@ -167,10 +160,6 @@ def _set_up_modified() -> None:
 
         _git_checkout_detached(1)
         _append_file("hello.txt", "Hello there!")
-
-        # Get current commit hash?
-        repo = pygit2.Repository(".")
-        MODIFIED_REPO_COMMIT_HASH = repo.head.target.hex[:6]  # type: ignore
     finally:
         os.chdir("..")
 
@@ -272,27 +261,38 @@ def _activate_outer_repo() -> None:
         pass
 
 
+def _get_modified_repo_commit_hash() -> str:
+    repo = pygit2.Repository("test/test-repos/modified")
+    return repo.head.target.hex[:6]  # type: ignore
+
+
 def _shared_setup() -> None:
     # TODO: Clean out existing repos?
     # TODO: Check that user is running tests from the root of the repo?
     global _working_dir
+    global modified_repo_commit_hash
     _working_dir = os.getcwd()
 
-    _set_up_directory_structure()
+    if os.path.exists("test/test-repos"):
+        print("Skipping setup: 'test/test-repos' already exists")
+    else:
+        _set_up_directory_structure()
 
-    _set_up_untracked()
-    _set_up_deleted()
-    _set_up_modified()
-    _set_up_unmerged()
-    _set_up_remote_empty()
-    _set_up_remote_staged()
-    _set_up_remote_ahead_behind()
+        _set_up_untracked()
+        _set_up_deleted()
+        _set_up_modified()
+        _set_up_unmerged()
+        _set_up_remote_empty()
+        _set_up_remote_staged()
+        _set_up_remote_ahead_behind()
 
-    _set_up_outside_files()
-
-    print()
+        _set_up_outside_files()
 
     os.chdir(_working_dir)
+
+    modified_repo_commit_hash = _get_modified_repo_commit_hash()
+
+    print()
 
 
 def _individual_setup() -> None:

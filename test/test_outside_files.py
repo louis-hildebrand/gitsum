@@ -24,7 +24,7 @@ class OutsideFileTests(BaseTestCase):
     def _do_test_outside_files(self) -> None:
         result_str = common.run_gitsum(["--outside-files"])
 
-        expected_output = _EXPECTED_COMBINED.replace("MODIFIED_REPO_COMMIT_HASH", common.MODIFIED_REPO_COMMIT_HASH)
+        expected_output = _EXPECTED_COMBINED.replace("MODIFIED_REPO_COMMIT_HASH", common.modified_repo_commit_hash)
 
         actual_expected = common.actual_expected(result_str, expected_output)
 
@@ -44,7 +44,7 @@ class OutsideFileTests(BaseTestCase):
     def _do_test_only_outside_files(self) -> None:
         result_str = common.run_gitsum(["--only-outside-files"])
 
-        expected_output = _EXPECTED_FILES.replace("MODIFIED_REPO_COMMIT_HASH", common.MODIFIED_REPO_COMMIT_HASH)
+        expected_output = _EXPECTED_FILES.replace("MODIFIED_REPO_COMMIT_HASH", common.modified_repo_commit_hash)
 
         actual_expected = common.actual_expected(result_str, expected_output)
 
