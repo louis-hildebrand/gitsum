@@ -110,14 +110,15 @@ def get_status(repo: Repository, name: str, fetch: bool) -> RepoStatus:
     return RepoStatus(name, branch_name, is_local, has_changes, branch_has_upstream, local_ahead, local_behind)
 
 
-def get_git_summary(fetch: bool, list_outside_files: bool) -> None:
+def get_git_summary(fetch: bool, list_outside_files: bool, only_outside_files: bool) -> None:
     cwd = os.getcwd()
-    repos = _get_git_repos(cwd, list_outside_files)
-    print(f"Found {len(repos)} Git repositories.")
-    statuses = [get_status(r, _truncate_path(r.path, True), fetch) for r in repos]
-    name_width = max([len(s.name) for s in statuses])
-    head_width = max([len(s.head) for s in statuses])
-    [print(s.to_string(name_width, head_width)) for s in statuses]
+    repos = _get_git_repos(cwd, list_outside_files or only_outside_files)
+    if not only_outside_files:
+        print(f"Found {len(repos)} Git repositories.")
+        statuses = [get_status(r, _truncate_path(r.path, True), fetch) for r in repos]
+        name_width = max([len(s.name) for s in statuses])
+        head_width = max([len(s.head) for s in statuses])
+        [print(s.to_string(name_width, head_width)) for s in statuses]
 
 
 def main() -> None:
@@ -127,8 +128,9 @@ def main() -> None:
     )
     parser.add_argument("-f", "--fetch", action="store_true", help="fetch before getting status")
     parser.add_argument("-o", "--outside-files", action="store_true", help="list files and directories that are not inside a Git repository")
+    parser.add_argument("-O", "--only-outside-files", action="store_true", help="list files and directories that are not inside a Git repository and exit")
     args = parser.parse_args()
-    get_git_summary(args.fetch, args.outside_files)
+    get_git_summary(args.fetch, args.outside_files, args.only_outside_files)
 
 
 if __name__ == "__main__":
