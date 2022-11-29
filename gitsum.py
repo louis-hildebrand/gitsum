@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-
 from dataclasses import dataclass
 from pathlib import Path
 from pygit2 import Remote, Repository  # type: ignore
