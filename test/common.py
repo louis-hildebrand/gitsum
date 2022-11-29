@@ -45,7 +45,7 @@ def _git_commit(msg: str) -> None:
     '''
     git commit -m ``msg``
     '''
-    _run_shell_command(["git", "commit", "--author", "gitsum tester <>", "-m", msg])
+    _run_shell_command(["git", "commit", '--author="gitsum tester <>"', "-m", msg])
 
 
 def _git_checkout_detached(n: int) -> None:
