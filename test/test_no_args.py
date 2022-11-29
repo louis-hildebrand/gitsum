@@ -15,20 +15,8 @@ _EXPECTED_OUTPUT = """Found 7 Git repositories.
 class NoArgsTests(BaseTestCase):
     def _do_test_no_args(self):
         result_str = common.run_gitsum([])
-
         expected_output = _EXPECTED_OUTPUT.replace("MODIFIED_REPO_COMMIT_HASH", common.modified_repo_commit_hash)
-
-        actual_expected = common.actual_expected(result_str, expected_output)
-
-        result_lines = [line.rstrip() for line in result_str.splitlines()]
-        expected_lines = [line.rstrip() for line in expected_output.splitlines()]
-
-        # Check number of lines
-        self.assertEqual(len(expected_lines), len(result_lines), actual_expected)
-
-        # Check line contents
-        for (expected, actual) in zip(expected_lines, result_lines):
-            self.assertEqual(expected, actual, actual_expected)
+        self.assert_gitsum_output(expected_output, result_str)
 
     def test_no_args(self) -> None:
         common.run_test(self._do_test_no_args)

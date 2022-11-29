@@ -21,9 +21,9 @@ modified_repo_commit_hash: str = "MODIFIED_REPO_COMMIT_HASH"
 def _run_shell_command(args: list[str], ignore_error: bool = False) -> None:
     result = subprocess.run(args, capture_output=True)
     error_msg = result.stderr.decode()
-    if error_msg:
-        print(error_msg)
     if not ignore_error:
+        if error_msg:
+            print(error_msg)
         result.check_returncode()
 
 
