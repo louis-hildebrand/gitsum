@@ -19,7 +19,11 @@ modified_repo_commit_hash: str = "MODIFIED_REPO_COMMIT_HASH"
 # Shell commands
 # ----------------------------------------------------------------------------------------------------------------------
 def _run_shell_command(args: list[str]) -> None:
-    subprocess.run(args, capture_output=True).check_returncode()
+    result = subprocess.run(args, capture_output=True)
+    error_msg = result.stderr.decode()
+    if error_msg:
+        print(error_msg)
+    result.check_returncode()
 
 
 def _git_init(dir: str, main_branch: str = "main") -> None:
