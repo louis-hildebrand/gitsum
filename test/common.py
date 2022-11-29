@@ -18,12 +18,13 @@ modified_repo_commit_hash: str = "MODIFIED_REPO_COMMIT_HASH"
 # ----------------------------------------------------------------------------------------------------------------------
 # Shell commands
 # ----------------------------------------------------------------------------------------------------------------------
-def _run_shell_command(args: list[str]) -> None:
+def _run_shell_command(args: list[str], ignore_error: bool = False) -> None:
     result = subprocess.run(args, capture_output=True)
     error_msg = result.stderr.decode()
     if error_msg:
         print(error_msg)
-    result.check_returncode()
+    if not ignore_error:
+        result.check_returncode()
 
 
 def _git_init(dir: str, main_branch: str = "main") -> None:
@@ -45,7 +46,10 @@ def _git_commit(msg: str) -> None:
     '''
     git commit -m ``msg``
     '''
-    _run_shell_command(["git", "commit", '--author="gitsum tester <>"', "-m", msg])
+    repo = pygit2.Repository(".")
+    sig = pygit2.Signature("gitsum tester", "gitsum tester")  # type: ignore
+    parents = [repo.head.target] if not repo.head_is_unborn else []
+    repo.create_commit("HEAD", sig, sig, msg, repo.index.write_tree(), parents)  # type: ignore
 
 
 def _git_checkout_detached(n: int) -> None:
@@ -70,7 +74,7 @@ def _git_merge(branch: str) -> None:
     '''
     git merge ``branch``
     '''
-    _run_shell_command(["git", "merge", branch])
+    _run_shell_command(["git", "merge", branch], ignore_error=True)
 
 
 def _git_clone(url: str, dir: str) -> None:
