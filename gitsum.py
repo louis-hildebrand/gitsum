@@ -117,6 +117,7 @@ def _get_git_summary(fetch: bool, list_outside_files: bool, only_outside_files: 
         statuses = [_get_status(r, _get_repo_name(r, cwd), fetch) for r in repos]
         name_width = max([len(s.name) for s in statuses])
         head_width = max([len(s.head) for s in statuses])
+        statuses.sort(key=lambda s: s.name)
         [print(s.to_string(name_width, head_width)) for s in statuses]
 
 
