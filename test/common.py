@@ -27,12 +27,14 @@ def _run_shell_command(args: list[str], ignore_error: bool = False) -> None:
         result.check_returncode()
 
 
-def _git_init(dir: str, main_branch: str = "main") -> None:
+def _git_init_and_config(dir: str, main_branch: str = "main") -> None:
     '''
     git init ``dir`` --initial-branch=``main_branch``
     '''
     # TODO: Rewrite this to support Git before 2.28?
     _run_shell_command(["git", "init", dir, "-b", main_branch])
+    _run_shell_command(["git", "config", "user.email", "gitsum tester"])
+    _run_shell_command(["git", "config", "user.name", "gitsum tester"])
 
 
 def _git_add_all() -> None:
@@ -135,13 +137,13 @@ def _set_up_directory_structure() -> None:
 
 def _set_up_untracked() -> None:
     print("Setting up repo 'untracked'")
-    _git_init("untracked")
+    _git_init_and_config("untracked")
     _create_file("untracked/hello.txt")
 
 
 def _set_up_deleted() -> None:
     print("Setting up repo 'deleted'")
-    _git_init("deleted", "master")
+    _git_init_and_config("deleted", "master")
     os.chdir("deleted")
     try:
         _create_file("hello.txt")
@@ -155,7 +157,7 @@ def _set_up_deleted() -> None:
 
 def _set_up_modified() -> None:
     print("Setting up repo 'modified'")
-    _git_init("modified")
+    _git_init_and_config("modified")
     os.chdir("modified")
     try:
         _create_file("hello.txt")
@@ -174,7 +176,7 @@ def _set_up_modified() -> None:
 
 def _set_up_unmerged() -> None:
     print("Setting up repo 'unmerged'")
-    _git_init("unmerged", "main")
+    _git_init_and_config("unmerged", "main")
     os.chdir("unmerged")
     try:
         _create_file("hello.txt")
