@@ -1,4 +1,3 @@
-import subprocess
 import unittest
 
 import test.common as common
@@ -6,17 +5,12 @@ import test.common as common
 
 class BaseTestCase(unittest.TestCase):
     # Ignore blank lines in the output (for some reason there are a lot of blank lines in GitHub Actions)
+    # TODO: Is this really necessary?
     ALLOW_BLANK_LINES = True
-
-    def _display_tree(self) -> None:
-        result = subprocess.run(["tree", "/f", "/a"], capture_output=True, shell=True)
-        result.check_returncode()
-        print(result.stdout.decode(encoding="utf-8"))
 
     def __init__(self, methodName: str):
         super(BaseTestCase, self).__init__(methodName)
         self.maxDiff = 0
-        self._display_tree()
 
     def assert_gitsum_output(self, expected: str, actual: str) -> None:
         diff = common.actual_expected(actual, expected)
