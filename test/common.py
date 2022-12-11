@@ -1,6 +1,7 @@
 from typing import Callable
 import os
 import pygit2  # type: ignore
+import stat
 import subprocess
 
 
@@ -335,8 +336,13 @@ def run_test(test: Callable[[], None]) -> None:
 
 
 def run_gitsum(args: list[str]) -> str:
-    # TODO: Make this platform-independent?
-    result = subprocess.run([f"..{os.path.sep}..{os.path.sep}gitsum"] + args, stdout=subprocess.PIPE, shell=True)
+    command = f"..{os.path.sep}..{os.path.sep}gitsum"
+
+    # Grant execute permission
+    current_mode = os.stat(command).st_mode
+    os.chmod(command, current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+    result = subprocess.run([command] + args, stdout=subprocess.PIPE, shell=True)
     result.check_returncode()
     result_str = result.stdout.decode()
     return result_str
