@@ -337,6 +337,7 @@ def run_test(test: Callable[[], None]) -> None:
 def run_gitsum(args: list[str]) -> str:
     # TODO: Make this platform-independent?
     result = subprocess.run([f"..{os.path.sep}..{os.path.sep}gitsum"] + args, stdout=subprocess.PIPE, shell=True)
+    result.check_returncode()
     result_str = result.stdout.decode()
     return result_str
 
