@@ -34,7 +34,9 @@ def _git_init(dir: str, main_branch: str = "main") -> None:
     git init ``dir`` --initial-branch=``main_branch``
     '''
     # TODO: Rewrite this to support Git before 2.28?
-    _run_shell_command(["git", "init", dir, "-b", main_branch])
+    repo = pygit2.init_repository(dir, initial_head=main_branch)  # type: ignore
+    repo.config["user.email"] = _GIT_USER_EMAIL  # type: ignore
+    repo.config["user.name"] = _GIT_USER_NAME  # type: ignore
 
 
 def _git_add_all() -> None:
@@ -127,11 +129,6 @@ def _overwrite_file(filename: str, text: str) -> None:
 # ----------------------------------------------------------------------------------------------------------------------
 # Set up: repo creation
 # ----------------------------------------------------------------------------------------------------------------------
-def _set_git_config() -> None:
-    _run_shell_command(["git", "config", "--global", "user.name", _GIT_USER_NAME])
-    _run_shell_command(["git", "config", "--global", "user.email", _GIT_USER_EMAIL])
-
-
 def _set_up_directory_structure() -> None:
     print("Setting up directory structure")
     os.chdir("test")
@@ -292,7 +289,6 @@ def _shared_setup() -> None:
         print("Skipping setup: 'test/test-repos' already exists")
     else:
         _set_up_directory_structure()
-        _set_git_config()
 
         _set_up_untracked()
         _set_up_deleted()
