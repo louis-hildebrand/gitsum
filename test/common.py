@@ -6,6 +6,8 @@ import subprocess
 
 _EMPTY_REPO_URL = "https://github.com/louis-hildebrand/empty.git"
 _NON_EMPTY_REPO_URL = "https://github.com/louis-hildebrand/test-repo.git"
+_GIT_USER_EMAIL = "gitsum tester"
+_GIT_USER_NAME = "gitsum tester"
 
 _working_dir = ""
 _setup_complete = False
@@ -27,14 +29,12 @@ def _run_shell_command(args: list[str], ignore_error: bool = False) -> None:
         result.check_returncode()
 
 
-def _git_init_and_config(dir: str, main_branch: str = "main") -> None:
+def _git_init(dir: str, main_branch: str = "main") -> None:
     '''
     git init ``dir`` --initial-branch=``main_branch``
     '''
     # TODO: Rewrite this to support Git before 2.28?
     _run_shell_command(["git", "init", dir, "-b", main_branch])
-    _run_shell_command(["git", "config", "user.email", "gitsum tester"])
-    _run_shell_command(["git", "config", "user.name", "gitsum tester"])
 
 
 def _git_add_all() -> None:
@@ -49,7 +49,7 @@ def _git_commit(msg: str) -> None:
     git commit -m ``msg``
     '''
     repo = pygit2.Repository(".")
-    sig = pygit2.Signature("gitsum tester", "gitsum tester")  # type: ignore
+    sig = pygit2.Signature(_GIT_USER_NAME, _GIT_USER_EMAIL)  # type: ignore
     parents = [repo.head.target] if not repo.head_is_unborn else []
     repo.create_commit("HEAD", sig, sig, msg, repo.index.write_tree(), parents)  # type: ignore
 
@@ -127,6 +127,11 @@ def _overwrite_file(filename: str, text: str) -> None:
 # ----------------------------------------------------------------------------------------------------------------------
 # Set up: repo creation
 # ----------------------------------------------------------------------------------------------------------------------
+def _set_git_config() -> None:
+    _run_shell_command(["git", "config", "--global", "user.name", _GIT_USER_NAME])
+    _run_shell_command(["git", "config", "--global", "user.email", _GIT_USER_EMAIL])
+
+
 def _set_up_directory_structure() -> None:
     print("Setting up directory structure")
     os.chdir("test")
@@ -137,13 +142,13 @@ def _set_up_directory_structure() -> None:
 
 def _set_up_untracked() -> None:
     print("Setting up repo 'untracked'")
-    _git_init_and_config("untracked")
+    _git_init("untracked")
     _create_file("untracked/hello.txt")
 
 
 def _set_up_deleted() -> None:
     print("Setting up repo 'deleted'")
-    _git_init_and_config("deleted", "master")
+    _git_init("deleted", "master")
     os.chdir("deleted")
     try:
         _create_file("hello.txt")
@@ -157,7 +162,7 @@ def _set_up_deleted() -> None:
 
 def _set_up_modified() -> None:
     print("Setting up repo 'modified'")
-    _git_init_and_config("modified")
+    _git_init("modified")
     os.chdir("modified")
     try:
         _create_file("hello.txt")
@@ -176,7 +181,7 @@ def _set_up_modified() -> None:
 
 def _set_up_unmerged() -> None:
     print("Setting up repo 'unmerged'")
-    _git_init_and_config("unmerged", "main")
+    _git_init("unmerged", "main")
     os.chdir("unmerged")
     try:
         _create_file("hello.txt")
@@ -287,6 +292,7 @@ def _shared_setup() -> None:
         print("Skipping setup: 'test/test-repos' already exists")
     else:
         _set_up_directory_structure()
+        _set_git_config()
 
         _set_up_untracked()
         _set_up_deleted()
