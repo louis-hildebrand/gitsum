@@ -5,6 +5,7 @@ from typing import TypeVar
 import argparse
 import os
 import pygit2  # type: ignore
+import sys
 
 
 T = TypeVar("T")
@@ -32,6 +33,10 @@ class RepoStatus:
 
     def __str__(self) -> str:
         return self.to_string(0, 0)
+
+
+def _warn(msg: str) -> None:
+    print(f"WARN: {msg}", file=sys.stderr)
 
 
 def _flatten(l: list[list[T]]) -> list[T]:
@@ -84,7 +89,7 @@ def _try_fetch(remote: Remote, repo_name: str) -> None:
         remote.fetch()  # type: ignore
     except pygit2.GitError:
         # TODO: Check credentials? Skip?
-        print(f"WARN: Failed to fetch repo '{repo_name}'")
+        _warn(f"Failed to fetch repo '{repo_name}'")
 
 
 def _get_status(repo: Repository, name: str, fetch: bool) -> RepoStatus:
