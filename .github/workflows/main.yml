@@ -37,6 +37,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
         pip install -r requirements.txt
+    - name: Grant execution permission
+      run: |
+        chmod +x gitsum
+      if: !startsWith(matrix.os, "windows")
     - name: Test with pytest
       run: |
         pytest

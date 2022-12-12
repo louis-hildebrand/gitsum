@@ -1,7 +1,6 @@
 from typing import Callable
 import os
 import pygit2  # type: ignore
-import stat
 import subprocess
 
 
@@ -337,11 +336,6 @@ def run_test(test: Callable[[], None]) -> None:
 
 def run_gitsum(args: list[str]) -> str:
     command = f"..{os.path.sep}..{os.path.sep}gitsum"
-
-    # Grant execute permission
-    current_mode = os.stat(command).st_mode
-    os.chmod(command, current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-
     result = subprocess.run(command + " " + " ".join(args), stdout=subprocess.PIPE, shell=True)
     result.check_returncode()
     result_str = result.stdout.decode()
