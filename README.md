@@ -7,10 +7,10 @@
 - Ensure you have Python 3.8+ installed.
 - Clone this repository.
 - Install the required dependencies using `pip install -r requirements.txt`.
-- (For Linux users) Grant execution permission to the script using `chmod u+x gitsum`.
+- (For *nix users) Grant execution permission to the script using `chmod u+x gitsum`.
 - Add this repository to your `PATH` environment variable.
 
-## Usage
+## Basic Usage
 Move to a directory in which there are Git repositories and then run `gitsum`.
 
 This will print out an overview of the status of each repository within the current directory (or its subdirectories). For example:
@@ -25,10 +25,37 @@ Found 7 Git repositories.
 !  untracked                      [LR]  (no commits)  *
 ```
 
-### Interpretation of Output
 - `[LR]` indicates that the given repo has _no_ remotes (i.e., this is a local repo), while `[LB]` indicates that the repo has one or more remotes but the current `HEAD` has no upstream (e.g., it has not been pushed, it is detached).
 - `*` indicates that there are local changes (e.g., untracked files, modified files, deleted files).
 - `>1` and `<3` say that the given repo is 1 commit ahead and 3 commits behind its upstream branch, respectively.
+
+## General Usage
+### Getting Help
+Run
+```sh
+gitsum --help
+```
+
+### Listing Files Outside Git Repos
+In some cases you might want to know if there are files or directories which are not in a Git repository (e.g., to know if you forgot to make a Git repo for any of your local projects).
+
+To see a list of files and directories that are not inside a Git repository (in addition to the normal output), run
+```sh
+gitsum --outside-files
+```
+
+To see _only_ these outside files (without the normal output), run
+```sh
+gitsum --only-outside-files
+```
+
+### Fetching Beforehand
+To fetch from each remote repository before displaying the repository statuses, run
+```sh
+gitsum --fetch
+```
+
+Note that this option is currently limited to public repositories. If `gitsum` is unable to fetch (e.g., because the repository is private), then a warning will simply be displayed. 
 
 ## Running the Tests
 The tests can be run by issuing the command `pytest` (or `python -m unittest`, if you prefer). This must be done from the root of the repository.
