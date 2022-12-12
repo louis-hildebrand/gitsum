@@ -1,4 +1,6 @@
 # gitsum
+[![Test gitsum](https://github.com/louis-hildebrand/gitsum/actions/workflows/main.yml/badge.svg)](https://github.com/louis-hildebrand/gitsum/actions/workflows/main.yml)
+
 `gitsum` is a command-line tool that provides a summary of multiple Git repositories.
 
 ## Installation
