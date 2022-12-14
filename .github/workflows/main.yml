@@ -89,7 +89,7 @@ jobs:
         label: ${{ format('{0} build', runner.os) }}
         message: 'Passed'
         color: 'green'
-        if: ${{ success() }}
+        if: ${{ !failure() }}
     - name: Create platorm-specific build status badge (failure)
       uses: schneegans/dynamic-badges-action@v1.6.0
       with:
