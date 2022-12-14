@@ -60,7 +60,7 @@ Note that this option is currently limited to public repositories. If `gitsum` i
 ## Running the Tests
 Before running the tests, install the test dependencies using `pip install -r test-requirements.txt`. The tests can be run by issuing the command `pytest` (or `python -m unittest`, if you prefer). This must be done from the root of the repository.
 
-Note that the tests are meant to be run in Python 3.8 (the output is sightly different on Python 3.9!). If you normally use a different version of Python and are seeing tests failing due to small differences in the help message, consider setting up a virtual environment with
+Note that the tests are meant to be run in Python 3.8 (in some cases the output is sightly different on other versions, like 3.10!). If you normally use a different version of Python and are seeing tests failing due to small differences in the help message, consider setting up a virtual environment with
 ```sh
 python3.8 -m venv .venv
 .venv/Scripts/activate  # or .venv/bin/activate, depending on your system
