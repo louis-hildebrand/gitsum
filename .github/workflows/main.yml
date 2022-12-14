@@ -80,3 +80,12 @@ jobs:
         minColorRange: 50
         maxColorRange: 90
       if: ${{ runner.os == 'Linux' }}
+    - name: Create platorm-specific build status badge
+      uses: schneegans/dynamic-badges-action@v1.6.0
+      with:
+        auth: ${{ secrets.GIST_TOKEN }}
+        gistID: cc9f4d1c6c0152b11b3eb2fe84fc0076
+        filename: ${{ format('gitsum-{0}.json', runner.os) }}
+        label: ${{ format('{0} build', runner.os) }}
+        message: ${{ (failure() && 'Failed') || 'Passed' }}
+        color: ${{ (failure() && 'red') || 'green' }}
