@@ -58,7 +58,7 @@ gitsum --fetch
 Note that this option is currently limited to public repositories. If `gitsum` is unable to fetch (e.g., because the repository is private), then a warning will simply be displayed. 
 
 ## Running the Tests
-The tests can be run by issuing the command `pytest` (or `python -m unittest`, if you prefer). This must be done from the root of the repository.
+Before running the tests, install the test dependencies using `pip install -r test-requirements.txt`. The tests can be run by issuing the command `pytest` (or `python -m unittest`, if you prefer). This must be done from the root of the repository.
 
 `gitsum` is verified by a few integration tests which create Git repos and check that the command's output is as expected. To avoid the `gitsum` repo itself interfering with the output, the repo is temporarily disabled by renaming the `.git/` folder. This might not be possible if your IDE is using the `.git/` folder. If you get errors, you might need to disable your IDE's Git integration for this project. For example, in VS Code, you can add a file `.vscode/settings.json` in the root of the repo with the following contents:
 ```json
