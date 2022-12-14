@@ -12,16 +12,17 @@ class TestCase(unittest.TestCase):
     _NON_EMPTY_REPO_URL = "https://github.com/louis-hildebrand/test-repo.git"
     _GIT_USER_EMAIL = "gitsum tester"
     _GIT_USER_NAME = "gitsum tester"
+    _GITSUM_REPO_ROOT: str
 
-    _working_dir = ""
-    _setup_complete = False
-    _old_repo_path = None
-    _new_repo_path = None
-    _modified_repo_commit_hash: str = MODIFIED_REPO_COMMIT_HASH
+    _one_time_setup_done = False
+    _modified_repo_commit_hash: str
 
     def __init__(self, methodName: str):
         super(TestCase, self).__init__(methodName)
         self.maxDiff = 0
+
+        self._old_repo_path: str
+        self._new_repo_path: str
 
     #region Shell commands
 
@@ -44,8 +45,8 @@ class TestCase(unittest.TestCase):
         '''
         # TODO: Rewrite this to support Git before 2.28?
         repo = pygit2.init_repository(dir, initial_head=main_branch)  # type: ignore
-        repo.config["user.email"] = _GIT_USER_EMAIL  # type: ignore
-        repo.config["user.name"] = _GIT_USER_NAME  # type: ignore
+        repo.config["user.email"] = TestCase._GIT_USER_EMAIL  # type: ignore
+        repo.config["user.name"] = TestCase._GIT_USER_NAME  # type: ignore
 
     def _git_add_all(self) -> None:
         '''
@@ -58,7 +59,7 @@ class TestCase(unittest.TestCase):
         git commit -m ``msg``
         '''
         repo = pygit2.Repository(".")
-        sig = pygit2.Signature(_GIT_USER_NAME, _GIT_USER_EMAIL)  # type: ignore
+        sig = pygit2.Signature(TestCase._GIT_USER_NAME, TestCase._GIT_USER_EMAIL)  # type: ignore
         parents = [repo.head.target] if not repo.head_is_unborn else []
         repo.create_commit("HEAD", sig, sig, msg, repo.index.write_tree(), parents)  # type: ignore
 
@@ -125,7 +126,7 @@ class TestCase(unittest.TestCase):
 
     #endregion
 
-    #region Setup helpers
+    #region Helpers for setup
 
     def _set_up_directory_structure(self) -> None:
         print("Setting up directory structure")
@@ -143,83 +144,84 @@ class TestCase(unittest.TestCase):
         print("Setting up repo 'deleted'")
         self._git_init("deleted", "master")
         os.chdir("deleted")
-        try:
-            self._create_file("hello.txt")
-            self._git_add_all()
-            self._git_commit("Initial commit")
 
-            self._delete_file("hello.txt")
-        finally:
-            os.chdir("..")
+        self._create_file("hello.txt")
+        self._git_add_all()
+        self._git_commit("Initial commit")
+
+        self._delete_file("hello.txt")
+
+        os.chdir("..")
 
     def _set_up_modified(self) -> None:
         print("Setting up repo 'modified'")
         self._git_init("modified")
         os.chdir("modified")
-        try:
-            self._create_file("hello.txt")
-            self._git_add_all()
-            self._git_commit("Initial commit")
 
-            self._create_file("general-kenobi.txt")
-            self._git_add_all()
-            self._git_commit("Create new file")
+        self._create_file("hello.txt")
+        self._git_add_all()
+        self._git_commit("Initial commit")
 
-            self._git_checkout_detached(1)
-            self._append_file("hello.txt", "Hello there!")
-        finally:
-            os.chdir("..")
+        self._create_file("general-kenobi.txt")
+        self._git_add_all()
+        self._git_commit("Create new file")
+
+        self._git_checkout_detached(1)
+
+        self._append_file("hello.txt", "Hello there!")
+
+        os.chdir("..")
 
     def _set_up_unmerged(self) -> None:
         print("Setting up repo 'unmerged'")
         self._git_init("unmerged", "main")
         os.chdir("unmerged")
-        try:
-            self._create_file("hello.txt")
-            self._append_file("hello.txt", "Hello there!")
-            self._git_add_all()
-            self._git_commit("Initial commit")
 
-            self._git_checkout_branch("feature", new=True)
-            self._overwrite_file("hello.txt", "General Kenobi!")
-            self._git_add_all()
-            self._git_commit("Create feature branch")
+        self._create_file("hello.txt")
+        self._append_file("hello.txt", "Hello there!")
+        self._git_add_all()
+        self._git_commit("Initial commit")
 
-            self._git_checkout_branch("main")
-            self._overwrite_file("hello.txt", "Come here, my little friend.")
-            self._git_add_all()
-            self._git_commit("Extend main branch")
+        self._git_checkout_branch("feature", new=True)
+        self._overwrite_file("hello.txt", "General Kenobi!")
+        self._git_add_all()
+        self._git_commit("Create feature branch")
 
-            self._git_merge("feature")
-        finally:
-            os.chdir("..")
+        self._git_checkout_branch("main")
+        self._overwrite_file("hello.txt", "Come here, my little friend.")
+        self._git_add_all()
+        self._git_commit("Extend main branch")
+
+        self._git_merge("feature")
+
+        os.chdir("..")
 
     def _set_up_remote_empty(self) -> None:
         print("Setting up repo 'remote/empty'")
-        self._git_clone(self._EMPTY_REPO_URL, "remote/empty")
+        self._git_clone(TestCase._EMPTY_REPO_URL, "remote/empty")
 
     def _set_up_remote_staged(self) -> None:
         print("Setting up repo 'remote/not empty/staged'")
-        self._git_clone(self._NON_EMPTY_REPO_URL, "remote/not empty/staged")
+        self._git_clone(TestCase._NON_EMPTY_REPO_URL, "remote/not empty/staged")
         os.chdir("remote/not empty/staged")
-        try:
-            self._git_checkout_branch("feature")
-            self._create_file("hello.txt")
-            self._git_add_all()
-        finally:
-            os.chdir("../../..")
+
+        self._git_checkout_branch("feature")
+        self._create_file("hello.txt")
+        self._git_add_all()
+
+        os.chdir("../../..")
 
     def _set_up_remote_ahead_behind(self) -> None:
         print("Setting up repo 'remote/not empty/ahead behind'")
-        self._git_clone(self._NON_EMPTY_REPO_URL, "remote/not empty/ahead behind")
+        self._git_clone(TestCase._NON_EMPTY_REPO_URL, "remote/not empty/ahead behind")
         os.chdir("remote/not empty/ahead behind")
-        try:
-            self._git_reset_hard(3)
-            self._create_file("hello.txt")
-            self._git_add_all()
-            self._git_commit("Add file")
-        finally:
-            os.chdir("../../..")
+
+        self._git_reset_hard(3)
+        self._create_file("hello.txt")
+        self._git_add_all()
+        self._git_commit("Add file")
+
+        os.chdir("../../..")
 
     def _set_up_outside_files(self) -> None:
         print("Setting up outside files")
@@ -235,41 +237,35 @@ class TestCase(unittest.TestCase):
         self._create_file("remote/outside.txt")
 
     def _disable_outer_repo(self) -> None:
-        global _old_repo_path
-        global _new_repo_path
         outer_repo = pygit2.discover_repository(".")
         if outer_repo:
-            #print(f"Disabling the outer repo at '{outer_repo}'")
-            old_repo_path = outer_repo[:-1] if outer_repo.endswith("/") else outer_repo
-            new_repo_path = old_repo_path + ".bak"
-            os.rename(old_repo_path, new_repo_path)
-            _old_repo_path = old_repo_path
-            _new_repo_path = new_repo_path
+            print(f"Disabling the outer repo at '{outer_repo}'")
+            ends_with_slash = outer_repo.endswith("/") or outer_repo.endswith("\\")
+            self._old_repo_path = outer_repo[:-1] if ends_with_slash else outer_repo
+            self._new_repo_path = self._old_repo_path + ".bak"
+            os.rename(self._old_repo_path, self._new_repo_path)
         else:
-            #print("No outer repo to disable")
+            print("No outer repo found to disable")
             pass
 
     def _activate_outer_repo(self) -> None:
-        if _old_repo_path and _new_repo_path:
-            #print(f"Re-activating the outer repo at '{_new_repo_path}'")
-            os.rename(_new_repo_path, _old_repo_path)
+        if self._old_repo_path and self._new_repo_path:
+            print(f"Re-activating the outer repo at '{self._new_repo_path}'")
+            os.rename(self._new_repo_path, self._old_repo_path)
         else:
-            #print("No outer repo to re-activate")
+            print("No outer repo found to re-activate")
             pass
 
-    def _get_modified_repo_commit_hash(self) -> str:
-        repo = pygit2.Repository("test/test-repos/modified")
-        return repo.head.target.hex[:6]  # type: ignore
+    def _do_one_time_setup(self) -> None:
+        """
+        Performs setup that only needs to be done once per test session (e.g., creating the test repos).
 
-    def _shared_setup(self) -> None:
-        # TODO: Clean out existing repos?
-        # TODO: Check that user is running tests from the root of the repo?
-        global _working_dir
-        global modified_repo_commit_hash
-        _working_dir = os.getcwd()
+        This function assumes it starts in the root of the repository. If no exceptions are raised, it will return to that directory by the end.
+        """
+        TestCase._GITSUM_REPO_ROOT = os.getcwd()
 
         if os.path.exists("test/test-repos"):
-            print("Skipping setup: 'test/test-repos' already exists")
+            print("Skipping test repo creation: 'test/test-repos' already exists")
         else:
             self._set_up_directory_structure()
 
@@ -283,17 +279,15 @@ class TestCase(unittest.TestCase):
 
             self._set_up_outside_files()
 
-        os.chdir(_working_dir)
+        os.chdir(TestCase._GITSUM_REPO_ROOT)
 
-        self._modified_repo_commit_hash = self._get_modified_repo_commit_hash()
+        # Record the commit hash here so that it can be used to check the command output
+        # This needs to be done whether or not the test repos already exist
+        repo = pygit2.Repository("test/test-repos/modified")
+        TestCase._modified_repo_commit_hash = repo.head.target.hex[:6]  # type: ignore
 
+        # Clear previous coverage data
         self._run_shell_command(["coverage", "erase"], True)
-
-        print()
-
-    def _individual_setup(self) -> None:
-        os.chdir("test/test-repos")
-        self._disable_outer_repo()
 
     #endregion
 
@@ -333,20 +327,20 @@ class TestCase(unittest.TestCase):
             self.assertEqual(expected, actual, diff)
 
     def assert_gitsum_output(self, expected: str, actual: str) -> None:
-        expected = expected.replace(self.MODIFIED_REPO_COMMIT_HASH, self._modified_repo_commit_hash)
+        expected = expected.replace(TestCase.MODIFIED_REPO_COMMIT_HASH, TestCase._modified_repo_commit_hash)
         self.assert_lines_equal(expected, actual)
 
     def setUp(self) -> None:
-        global _setup_complete
         try:
-            if not self._setup_complete:
-                self._shared_setup()
-                _setup_complete = True
-            self._individual_setup()
+            if not TestCase._one_time_setup_done:
+                self._do_one_time_setup()
+                TestCase._one_time_setup_done = True
+            os.chdir("test/test-repos")
+            self._disable_outer_repo()
         except:
-            os.chdir(_working_dir)
+            os.chdir(TestCase._GITSUM_REPO_ROOT)
             raise
 
     def tearDown(self) -> None:
-        os.chdir(_working_dir)
+        os.chdir(TestCase._GITSUM_REPO_ROOT)
         self._activate_outer_repo()
