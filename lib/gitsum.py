@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from pygit2 import Remote, Repository  # type: ignore
-from typing import TypeVar
+from typing import List, Tuple, TypeVar
 import argparse
 import os
 import pygit2  # type: ignore
@@ -39,11 +39,11 @@ def _warn(msg: str) -> None:
     print(f"WARN: {msg}", file=sys.stderr)
 
 
-def _flatten(l: list[list[T]]) -> list[T]:
+def _flatten(l: List[List[T]]) -> List[T]:
     return [x for sublist in l for x in sublist]
 
 
-def _do_get_git_repos(dir: Path) -> tuple[list[Repository], list[Path]]:
+def _do_get_git_repos(dir: Path) -> Tuple[List[Repository], List[Path]]:
     # TODO: for this specific folder, pygit2.discover_repository() returns a path but the Repository constructor rejects that same path. Why???
     if "Special Characters" in str(dir):
         return ([], [])
@@ -62,7 +62,7 @@ def _do_get_git_repos(dir: Path) -> tuple[list[Repository], list[Path]]:
         return (repos, [dir])
 
 
-def _get_git_repos(dir: Path, list_outside_files: bool) -> list[Repository]:
+def _get_git_repos(dir: Path, list_outside_files: bool) -> List[Repository]:
     """
     Recursively searches for git repos starting in (and including) the given directory.
     """
@@ -138,5 +138,4 @@ def main() -> None:
     _get_git_summary(args.fetch, args.outside_files, args.only_outside_files)
 
 
-if __name__ == "__main__":
-    main()
+main()

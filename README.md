@@ -60,12 +60,12 @@ Note that this option is currently limited to public repositories. If `gitsum` i
 ## Running the Tests
 Before running the tests, install the test dependencies using `pip install -r test-requirements.txt`. The tests can be run by issuing the command `pytest` (or `python -m unittest`, if you prefer). This must be done from the root of the repository.
 
-Note that the tests are meant to be run in Python 3.9 (the output is sightly different on Python 3.10!). If you normally use Python 3.10+, consider setting up a virtual environment with
+Note that the tests are meant to be run in Python 3.8 (the output is sightly different on Python 3.9!). If you normally use a different version of Python and are seeing tests failing due to small differences in the help message, consider setting up a virtual environment with
 ```sh
-python3.9 -m venv .venv
-.venv/Scripts/activate
+python3.8 -m venv .venv
+.venv/Scripts/activate  # or .venv/bin/activate, depending on your system
 ```
-(where `python3.9` may need to be replaced with the path to your Python 3.9 installation.)
+(where `python3.8` may need to be replaced with the path to your Python 3.8 installation.)
 
 `gitsum` is verified by a few integration tests which create Git repos and check that the command's output is as expected. To avoid the `gitsum` repo itself interfering with the output, the repo is temporarily disabled by renaming the `.git/` folder. This might not be possible if your IDE is using the `.git/` folder. If you get errors, you might need to disable your IDE's Git integration for this project. For example, in VS Code, you can add a file `.vscode/settings.json` in the root of the repo with the following contents:
 ```json

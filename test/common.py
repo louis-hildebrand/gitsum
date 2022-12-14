@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, List
 import os
 import pygit2  # type: ignore
 import subprocess
@@ -20,7 +20,7 @@ modified_repo_commit_hash: str = "MODIFIED_REPO_COMMIT_HASH"
 # ----------------------------------------------------------------------------------------------------------------------
 # Shell commands
 # ----------------------------------------------------------------------------------------------------------------------
-def run_shell_command(args: list[str], ignore_error: bool = False, shell: bool = False) -> str:
+def run_shell_command(args: List[str], ignore_error: bool = False, shell: bool = False) -> str:
     if shell:
         args_str = " ".join(args)
         result = subprocess.run(args_str, capture_output=True, shell=True)
@@ -341,7 +341,7 @@ def run_test(test: Callable[[], None]) -> None:
         _tear_down()
 
 
-def run_gitsum(args: list[str]) -> str:
+def run_gitsum(args: List[str]) -> str:
     gitsum_command = [f"..{os.path.sep}..{os.path.sep}lib{os.path.sep}gitsum.py"]
     coverage_command = ["coverage", "run", "--append", "--branch", "--data-file=../../.coverage"]
     return run_shell_command(coverage_command + gitsum_command + args)

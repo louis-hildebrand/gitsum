@@ -1,5 +1,3 @@
 #!/usr/bin/env python3
 
-import lib.gitsum as gitsum
-
-gitsum.main()
+import lib.gitsum  # type: ignore
