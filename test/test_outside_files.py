@@ -1,5 +1,5 @@
 from test.base_test_case import BaseTestCase
-import test.common as common
+import test.base_test_case as base_test_case
 
 
 _EXPECTED_FILES = """OUTSIDE: all-outside/
@@ -22,17 +22,17 @@ _EXPECTED_COMBINED = _EXPECTED_FILES + "\n" + _EXPECTED_REPOS
 
 class OutsideFileTests(BaseTestCase):
     def _do_test_outside_files(self) -> None:
-        result_str = common.run_gitsum(["--outside-files"])
-        expected_output = _EXPECTED_COMBINED.replace("MODIFIED_REPO_COMMIT_HASH", common.modified_repo_commit_hash)
+        result_str = base_test_case.run_gitsum(["--outside-files"])
+        expected_output = _EXPECTED_COMBINED.replace("MODIFIED_REPO_COMMIT_HASH", base_test_case.modified_repo_commit_hash)
         self.assert_gitsum_output(expected_output, result_str)
 
     def test_outside_files(self) -> None:
-        common.run_test(self._do_test_outside_files)
+        base_test_case.run_test(self._do_test_outside_files)
 
     def _do_test_only_outside_files(self) -> None:
-        result_str = common.run_gitsum(["--only-outside-files"])
-        expected_output = _EXPECTED_FILES.replace("MODIFIED_REPO_COMMIT_HASH", common.modified_repo_commit_hash)
+        result_str = base_test_case.run_gitsum(["--only-outside-files"])
+        expected_output = _EXPECTED_FILES.replace("MODIFIED_REPO_COMMIT_HASH", base_test_case.modified_repo_commit_hash)
         self.assert_gitsum_output(expected_output, result_str)
 
     def test_only_outside_files(self) -> None:
-        common.run_test(self._do_test_only_outside_files)
+        base_test_case.run_test(self._do_test_only_outside_files)

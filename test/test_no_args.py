@@ -1,5 +1,5 @@
 from test.base_test_case import BaseTestCase
-import test.common as common
+import test.base_test_case as base_test_case
 
 
 _EXPECTED_OUTPUT = """Found 7 Git repositories.
@@ -14,9 +14,9 @@ _EXPECTED_OUTPUT = """Found 7 Git repositories.
 
 class NoArgsTests(BaseTestCase):
     def _do_test_no_args(self):
-        result_str = common.run_gitsum([])
-        expected_output = _EXPECTED_OUTPUT.replace("MODIFIED_REPO_COMMIT_HASH", common.modified_repo_commit_hash)
+        result_str = base_test_case.run_gitsum([])
+        expected_output = _EXPECTED_OUTPUT.replace("MODIFIED_REPO_COMMIT_HASH", base_test_case.modified_repo_commit_hash)
         self.assert_gitsum_output(expected_output, result_str)
 
     def test_no_args(self) -> None:
-        common.run_test(self._do_test_no_args)
+        base_test_case.run_test(self._do_test_no_args)
