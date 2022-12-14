@@ -38,16 +38,16 @@ jobs:
         pip install -r test-requirements.txt
         pip install -r requirements.txt
     - name: Grant execution permission
+      if: ${{ runner.os != 'Windows' }}
       run: |
         chmod +x gitsum
-      if: ${{ runner.os != 'Windows' }}
     - name: Test with pytest
       run: |
         pytest
     # Manually debug failing pipeline
     - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
       if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled && failure() }}
+      uses: mxschmitt/action-tmate@v3
     - name: Report test coverage
       run: |
         coverage report
@@ -55,20 +55,21 @@ jobs:
     # Generate test coverage
     # Do this on Ubuntu because that's usually the fastest build
     - name: Read coverage display
+      if: ${{ runner.os == 'Linux' }}
       id: read_coverage_display
       uses: notiz-dev/github-action-json-property@v0.2.0
       with: 
           path: 'coverage.json'
           prop_path: 'totals.percent_covered_display'
-      if: ${{ runner.os == 'Linux' }}
     - name: Read coverage percent
+      if: ${{ runner.os == 'Linux' }}
       id: read_coverage_percent
       uses: notiz-dev/github-action-json-property@v0.2.0
       with: 
           path: 'coverage.json'
           prop_path: 'totals.percent_covered'
-      if: ${{ runner.os == 'Linux' }}
     - name: Create code coverage badge
+      if: ${{ runner.os == 'Linux' }}
       uses: schneegans/dynamic-badges-action@v1.6.0
       with:
         auth: ${{ secrets.GIST_TOKEN }}
@@ -79,8 +80,8 @@ jobs:
         valColorRange: ${{ steps.read_coverage_percent.outputs.prop }}
         minColorRange: 50
         maxColorRange: 90
-      if: ${{ runner.os == 'Linux' }}
     - name: Create platorm-specific build status badge (success)
+      if: ${{ success() }}
       uses: schneegans/dynamic-badges-action@v1.6.0
       with:
         auth: ${{ secrets.GIST_TOKEN }}
@@ -89,8 +90,8 @@ jobs:
         label: ${{ format('{0} build', runner.os) }}
         message: 'Passed'
         color: 'green'
-        if: ${{ !failure() }}
     - name: Create platorm-specific build status badge (failure)
+      if: ${{ failure() }}
       uses: schneegans/dynamic-badges-action@v1.6.0
       with:
         auth: ${{ secrets.GIST_TOKEN }}
@@ -99,4 +100,3 @@ jobs:
         label: ${{ format('{0} build', runner.os) }}
         message: 'Failed'
         color: 'red'
-        if: ${{ failure() }}
