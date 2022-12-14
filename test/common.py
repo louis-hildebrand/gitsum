@@ -337,10 +337,9 @@ def run_test(test: Callable[[], None]) -> None:
 
 
 def run_gitsum(args: list[str]) -> str:
-    gitsum_command = f"..{os.path.sep}..{os.path.sep}lib{os.path.sep}gitsum.py"
-    coverage_command = "coverage run --append --branch --data-file=../../.coverage"
-    args_str = " ".join(args)
-    result = subprocess.run(f"{coverage_command} {gitsum_command} {args_str}", stdout=subprocess.PIPE)
+    gitsum_command = [f"..{os.path.sep}..{os.path.sep}lib{os.path.sep}gitsum.py"]
+    coverage_command = ["coverage", "run", "--append", "--branch", "--data-file=../../.coverage"]
+    result = subprocess.run(coverage_command + gitsum_command + args, stdout=subprocess.PIPE)
     result.check_returncode()
     result_str = result.stdout.decode()
     return result_str
