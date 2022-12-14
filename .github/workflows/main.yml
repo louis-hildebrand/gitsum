@@ -61,7 +61,7 @@ jobs:
     - name: Create code coverage badge
       uses: schneegans/dynamic-badges-action@v1.6.0
       with:
-        auth: ${{ secrets.GIST_SECRET }}
+        auth: ${{ secrets.GIST_TOKEN }}
         gistID: cc9f4d1c6c0152b11b3eb2fe84fc0076
         filename: gitsum-coverage.json
         label: Test coverage
