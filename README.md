@@ -1,5 +1,6 @@
 # gitsum
-[![Test gitsum](https://github.com/louis-hildebrand/gitsum/actions/workflows/main.yml/badge.svg)](https://github.com/louis-hildebrand/gitsum/actions/workflows/main.yml)
+[![Build success badge](https://github.com/louis-hildebrand/gitsum/actions/workflows/main.yml/badge.svg)](https://github.com/louis-hildebrand/gitsum/actions/workflows/main.yml)
+![Coverage badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/louis-hildebrand/cc9f4d1c6c0152b11b3eb2fe84fc0076/raw/gitsum-coverage.json)
 
 `gitsum` is a command-line tool that provides a summary of multiple Git repositories.
 
