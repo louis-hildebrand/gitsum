@@ -37,6 +37,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r test-requirements.txt
         pip install -r requirements.txt
+    - name: Grant execution permission
+      run: |
+        chmod +x gitsum
+      if: ${{ runner.os != 'Windows' }}
     - name: Test with pytest
       run: |
         pytest
