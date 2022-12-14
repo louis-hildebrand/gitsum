@@ -1,4 +1,4 @@
-from test.base_test_case import BaseTestCase
+from test.base_test_case import TestCase
 import test.base_test_case as base_test_case
 
 
@@ -12,7 +12,7 @@ _EXPECTED_OUTPUT = """Found 7 Git repositories.
 !  untracked                      [LR]  (no commits)  *"""
 
 
-class NoArgsTests(BaseTestCase):
+class NoArgsTests(TestCase):
     def test_no_args(self):
         result_str = base_test_case.run_gitsum([])
         expected_output = _EXPECTED_OUTPUT.replace("MODIFIED_REPO_COMMIT_HASH", base_test_case.modified_repo_commit_hash)

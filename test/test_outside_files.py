@@ -1,4 +1,4 @@
-from test.base_test_case import BaseTestCase
+from test.base_test_case import TestCase
 import test.base_test_case as base_test_case
 
 
@@ -20,7 +20,7 @@ _EXPECTED_REPOS = """Found 7 Git repositories.
 _EXPECTED_COMBINED = _EXPECTED_FILES + "\n" + _EXPECTED_REPOS
 
 
-class OutsideFileTests(BaseTestCase):
+class OutsideFileTests(TestCase):
     def test_outside_files(self) -> None:
         result_str = base_test_case.run_gitsum(["--outside-files"])
         expected_output = _EXPECTED_COMBINED.replace("MODIFIED_REPO_COMMIT_HASH", base_test_case.modified_repo_commit_hash)

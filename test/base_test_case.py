@@ -337,11 +337,26 @@ def actual_expected(actual: str, expected: str) -> str:
     return out
 
 
-class BaseTestCase(unittest.TestCase):
+class NoSetupTestCase(unittest.TestCase):
     def __init__(self, methodName: str):
-        super(BaseTestCase, self).__init__(methodName)
+        super(NoSetupTestCase, self).__init__(methodName)
         self.maxDiff = 0
 
+    def assert_gitsum_output(self, expected: str, actual: str) -> None:
+        diff = actual_expected(actual, expected)
+
+        result_lines = [line.rstrip() for line in actual.splitlines()]
+        expected_lines = [line.rstrip() for line in expected.splitlines()]
+
+        # Check number of lines
+        self.assertEqual(len(expected_lines), len(result_lines), diff)
+
+        # Check line contents
+        for (expected, actual) in zip(expected_lines, result_lines):
+            self.assertEqual(expected, actual, diff)
+
+
+class TestCase(NoSetupTestCase):
     def setUp(self):
         global _setup_complete
         try:
@@ -356,16 +371,3 @@ class BaseTestCase(unittest.TestCase):
     def tearDown(self):
         os.chdir(_working_dir)
         _activate_outer_repo()
-
-    def assert_gitsum_output(self, expected: str, actual: str) -> None:
-        diff = actual_expected(actual, expected)
-
-        result_lines = [line.rstrip() for line in actual.splitlines()]
-        expected_lines = [line.rstrip() for line in expected.splitlines()]
-
-        # Check number of lines
-        self.assertEqual(len(expected_lines), len(result_lines), diff)
-
-        # Check line contents
-        for (expected, actual) in zip(expected_lines, result_lines):
-            self.assertEqual(expected, actual, diff)

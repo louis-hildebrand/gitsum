@@ -3,7 +3,7 @@ Simple test case to check that the platform-specific entry scripts (gitsum and g
 """
 import os
 
-from test.base_test_case import BaseTestCase
+from test.base_test_case import NoSetupTestCase
 import test.base_test_case as base_test_case
 
 
@@ -21,8 +21,8 @@ optional arguments:
                         repository and exit"""
 
 
-class HelpTests(BaseTestCase):
+class HelpTests(NoSetupTestCase):
     def test_help(self):
         sep = os.path.sep
-        result = base_test_case.run_shell_command([f"..{sep}..{sep}gitsum", "--help"], shell=True)
+        result = base_test_case.run_shell_command([f".{sep}gitsum", "--help"], shell=True)
         self.assert_gitsum_output(_EXPECTED_HELP_MSG, result)
