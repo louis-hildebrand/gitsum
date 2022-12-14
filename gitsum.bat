@@ -1,3 +1,3 @@
 @echo off
 
-python %~dp0/lib/gitsum.py %*
+python %~dp0/gitsum.py %*

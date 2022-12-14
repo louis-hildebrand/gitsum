@@ -292,13 +292,18 @@ class TestCase(unittest.TestCase):
     #endregion
 
     def run_gitsum(self, args: List[str], shell: bool = False) -> str:
+        """
+        If `shell` is `False`, runs `gitsum.py` and measures the test coverage.
+
+        If `shell` is `True`, runs the platform-specific entry script (`gitsum` or `gitsum.bat`) in the shell without measuring its coverage.
+        """
         slash = os.path.sep
         if shell:
-            gitsum_path = f"..{slash}..{slash}gitsum"
+            command = [f"..{slash}..{slash}gitsum"]
         else:
-            gitsum_path = f"..{slash}..{slash}lib{slash}gitsum.py"
-        coverage_command = ["coverage", "run", "--append", "--branch", "--data-file=../../.coverage"]
-        return self._run_shell_command(coverage_command + [gitsum_path] + args, shell=shell)
+            gitsum_path = f"..{slash}..{slash}gitsum.py"
+            command = ["coverage", "run", "--append", "--branch", "--data-file=../../.coverage", gitsum_path]
+        return self._run_shell_command(command + args, shell=shell)
 
     def _make_assert_message(self, actual: str, expected: str) -> str:
         out = "\n" + ("~" * 31) + " OUTPUT " + ("~" * 31) + "\n"
