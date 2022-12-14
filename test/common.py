@@ -20,13 +20,18 @@ modified_repo_commit_hash: str = "MODIFIED_REPO_COMMIT_HASH"
 # ----------------------------------------------------------------------------------------------------------------------
 # Shell commands
 # ----------------------------------------------------------------------------------------------------------------------
-def _run_shell_command(args: list[str], ignore_error: bool = False) -> None:
-    result = subprocess.run(args, capture_output=True)
-    error_msg = result.stderr.decode()
+def run_shell_command(args: list[str], ignore_error: bool = False, shell: bool = False) -> str:
+    if shell:
+        args_str = " ".join(args)
+        result = subprocess.run(args_str, capture_output=True, shell=True)
+    else:
+        result = subprocess.run(args, capture_output=True)
     if not ignore_error:
+        error_msg = result.stderr.decode()
         if error_msg:
             print(error_msg)
         result.check_returncode()
+    return result.stdout.decode()
 
 
 def _git_init(dir: str, main_branch: str = "main") -> None:
@@ -43,7 +48,7 @@ def _git_add_all() -> None:
     '''
     git add .
     '''
-    _run_shell_command(["git", "add", "."])
+    run_shell_command(["git", "add", "."])
 
 
 def _git_commit(msg: str) -> None:
@@ -60,7 +65,7 @@ def _git_checkout_detached(n: int) -> None:
     '''
     git checkout HEAD~``n``
     '''
-    _run_shell_command(["git", "checkout", f"HEAD~{n}"])
+    run_shell_command(["git", "checkout", f"HEAD~{n}"])
 
 
 def _git_checkout_branch(branch: str, new: bool = False) -> None:
@@ -71,28 +76,28 @@ def _git_checkout_branch(branch: str, new: bool = False) -> None:
     if new:
         args.append("-b")
     args.append(branch)
-    _run_shell_command(args)
+    run_shell_command(args)
 
 
 def _git_merge(branch: str) -> None:
     '''
     git merge ``branch``
     '''
-    _run_shell_command(["git", "merge", branch], ignore_error=True)
+    run_shell_command(["git", "merge", branch], ignore_error=True)
 
 
 def _git_clone(url: str, dir: str) -> None:
     '''
     git clone ``url`` ``dir``
     '''
-    _run_shell_command(["git", "clone", url, dir])
+    run_shell_command(["git", "clone", url, dir])
 
 
 def _git_reset_hard(n: int) -> None:
     '''
     git reset --hard HEAD~``n``
     '''
-    _run_shell_command(["git", "reset", "--hard", f"HEAD~{n}"])
+    run_shell_command(["git", "reset", "--hard", f"HEAD~{n}"])
 
 
 def _create_file(filename: str) -> None:
@@ -304,7 +309,7 @@ def _shared_setup() -> None:
 
     modified_repo_commit_hash = _get_modified_repo_commit_hash()
 
-    _run_shell_command(["coverage", "erase"], True)
+    run_shell_command(["coverage", "erase"], True)
 
     print()
 
@@ -339,10 +344,7 @@ def run_test(test: Callable[[], None]) -> None:
 def run_gitsum(args: list[str]) -> str:
     gitsum_command = [f"..{os.path.sep}..{os.path.sep}lib{os.path.sep}gitsum.py"]
     coverage_command = ["coverage", "run", "--append", "--branch", "--data-file=../../.coverage"]
-    result = subprocess.run(coverage_command + gitsum_command + args, stdout=subprocess.PIPE)
-    result.check_returncode()
-    result_str = result.stdout.decode()
-    return result_str
+    return run_shell_command(coverage_command + gitsum_command + args)
 
 def actual_expected(actual: str, expected: str) -> str:
     out = "\n" + ("=" * 31) + " OUTPUT " + ("=" * 31) + "\n"
