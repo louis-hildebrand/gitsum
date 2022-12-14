@@ -11,7 +11,7 @@ _EXPECTED_HELP_MSG = """usage: gitsum [-h] [-f] [-o] [-O]
 
 View a summary of statuses for multiple Git repositories.
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
   -f, --fetch           fetch before getting status
   -o, --outside-files   list files and directories that are not inside a Git
