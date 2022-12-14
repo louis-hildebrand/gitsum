@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import List
 import os
 import pygit2  # type: ignore
 import subprocess
@@ -320,32 +320,11 @@ def _individual_setup() -> None:
     _disable_outer_repo()
 
 
-def _tear_down() -> None:
-    # TODO: Activate current repo
-    # TODO: Disable inner repos?
-    os.chdir(_working_dir)
-    _activate_outer_repo()
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-# General utility
-# ----------------------------------------------------------------------------------------------------------------------
-def run_test(test: Callable[[], None]) -> None:
-    global _setup_complete
-    try:
-        if not _setup_complete:
-            _shared_setup()
-            _setup_complete = True
-        _individual_setup()
-        test()
-    finally:
-        _tear_down()
-
-
 def run_gitsum(args: List[str]) -> str:
     gitsum_command = [f"..{os.path.sep}..{os.path.sep}lib{os.path.sep}gitsum.py"]
     coverage_command = ["coverage", "run", "--append", "--branch", "--data-file=../../.coverage"]
     return run_shell_command(coverage_command + gitsum_command + args)
+
 
 def actual_expected(actual: str, expected: str) -> str:
     out = "\n" + ("=" * 31) + " OUTPUT " + ("=" * 31) + "\n"
@@ -362,6 +341,21 @@ class BaseTestCase(unittest.TestCase):
     def __init__(self, methodName: str):
         super(BaseTestCase, self).__init__(methodName)
         self.maxDiff = 0
+
+    def setUp(self):
+        global _setup_complete
+        try:
+            if not _setup_complete:
+                _shared_setup()
+                _setup_complete = True
+            _individual_setup()
+        except:
+            os.chdir(_working_dir)
+            raise
+
+    def tearDown(self):
+        os.chdir(_working_dir)
+        _activate_outer_repo()
 
     def assert_gitsum_output(self, expected: str, actual: str) -> None:
         diff = actual_expected(actual, expected)

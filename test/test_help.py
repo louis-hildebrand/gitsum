@@ -24,5 +24,5 @@ optional arguments:
 class HelpTests(BaseTestCase):
     def test_help(self):
         sep = os.path.sep
-        result = base_test_case.run_shell_command([f".{sep}gitsum", "--help"], shell=True)
+        result = base_test_case.run_shell_command([f"..{sep}..{sep}gitsum", "--help"], shell=True)
         self.assert_gitsum_output(_EXPECTED_HELP_MSG, result)
