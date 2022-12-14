@@ -52,12 +52,18 @@ jobs:
       run: |
         coverage report
         coverage json
-    - name: Read coverage.json
-      id: read_coverage
-      uses: notiz-dev/github-action-json-property@release
+    - name: Read coverage display
+      id: read_coverage_display
+      uses: notiz-dev/github-action-json-property@v0.2.0
       with: 
           path: 'coverage.json'
           prop_path: 'totals.percent_covered_display'
+    - name: Read coverage percent
+      id: read_coverage_percent
+      uses: notiz-dev/github-action-json-property@v0.2.0
+      with: 
+          path: 'coverage.json'
+          prop_path: 'totals.percent_covered'
     - name: Create code coverage badge
       uses: schneegans/dynamic-badges-action@v1.6.0
       with:
@@ -65,6 +71,7 @@ jobs:
         gistID: cc9f4d1c6c0152b11b3eb2fe84fc0076
         filename: gitsum-coverage.json
         label: Test coverage
-        message: "92%"
+        message: ${{ format('{0}%', steps.read_coverage_display.outputs.prop) }}
+        valColorRange: ${{ steps.read_coverage_percent.outputs.prop }}
         minColorRange: 50
         maxColorRange: 90
