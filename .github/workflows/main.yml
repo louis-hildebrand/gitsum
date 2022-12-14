@@ -79,4 +79,4 @@ jobs:
         valColorRange: ${{ steps.read_coverage_percent.outputs.prop }}
         minColorRange: 50
         maxColorRange: 90
-    if: ${{ runner.os == 'Linux' }}
+      if: ${{ runner.os == 'Linux' }}
