@@ -5,52 +5,7 @@ import subprocess
 import unittest
 
 
-class NoSetupTestCase(unittest.TestCase):
-    def __init__(self, methodName: str):
-        super(NoSetupTestCase, self).__init__(methodName)
-        self.maxDiff = 0
-
-    def run_shell_command(self, args: List[str], ignore_error: bool = False, shell: bool = False) -> str:
-        if shell:
-            args_str = " ".join(args)
-            result = subprocess.run(args_str, capture_output=True, shell=True)
-        else:
-            result = subprocess.run(args, capture_output=True)
-        if not ignore_error:
-            error_msg = result.stderr.decode()
-            if error_msg:
-                print(error_msg)
-            result.check_returncode()
-        return result.stdout.decode()
-
-    def actual_expected(self, actual: str, expected: str) -> str:
-        out = "\n" + ("~" * 31) + " OUTPUT " + ("~" * 31) + "\n"
-        out += actual + "\n"
-
-        out += ("~" * 30) + " EXPECTED " + ("~" * 30) + "\n"
-        out += expected + "\n"
-        out += ("~" * 70) + "\n"
-
-        return out
-
-    def assert_lines_equal(self, expected: str, actual: str) -> None:
-        """
-        Asserts that each line in each string is the same, ignoring trailing whitespace. Also adds a message with the expected and actual outputs.
-        """
-        diff = self.actual_expected(actual, expected)
-
-        result_lines = [line.rstrip() for line in actual.splitlines()]
-        expected_lines = [line.rstrip() for line in expected.splitlines()]
-
-        # Check number of lines
-        self.assertEqual(len(expected_lines), len(result_lines), diff)
-
-        # Check line contents
-        for (expected, actual) in zip(expected_lines, result_lines):
-            self.assertEqual(expected, actual, diff)
-
-
-class TestCase(NoSetupTestCase):
+class TestCase(unittest.TestCase):
     MODIFIED_REPO_COMMIT_HASH = "MODIFIED_REPO_COMMIT_HASH"
 
     _EMPTY_REPO_URL = "https://github.com/louis-hildebrand/empty.git"
@@ -63,6 +18,25 @@ class TestCase(NoSetupTestCase):
     _old_repo_path = None
     _new_repo_path = None
     _modified_repo_commit_hash: str = MODIFIED_REPO_COMMIT_HASH
+
+    def __init__(self, methodName: str):
+        super(TestCase, self).__init__(methodName)
+        self.maxDiff = 0
+
+    #region Shell commands
+
+    def _run_shell_command(self, args: List[str], ignore_error: bool = False, shell: bool = False) -> str:
+        if shell:
+            args_str = " ".join(args)
+            result = subprocess.run(args_str, capture_output=True, shell=True)
+        else:
+            result = subprocess.run(args, capture_output=True)
+        if not ignore_error:
+            error_msg = result.stderr.decode()
+            if error_msg:
+                print(error_msg)
+            result.check_returncode()
+        return result.stdout.decode()
 
     def _git_init(self, dir: str, main_branch: str = "main") -> None:
         '''
@@ -77,7 +51,7 @@ class TestCase(NoSetupTestCase):
         '''
         git add .
         '''
-        self.run_shell_command(["git", "add", "."])
+        self._run_shell_command(["git", "add", "."])
 
     def _git_commit(self, msg: str) -> None:
         '''
@@ -92,7 +66,7 @@ class TestCase(NoSetupTestCase):
         '''
         git checkout HEAD~``n``
         '''
-        self.run_shell_command(["git", "checkout", f"HEAD~{n}"])
+        self._run_shell_command(["git", "checkout", f"HEAD~{n}"])
 
     def _git_checkout_branch(self, branch: str, new: bool = False) -> None:
         '''
@@ -102,25 +76,25 @@ class TestCase(NoSetupTestCase):
         if new:
             args.append("-b")
         args.append(branch)
-        self.run_shell_command(args)
+        self._run_shell_command(args)
 
     def _git_merge(self, branch: str) -> None:
         '''
         git merge ``branch``
         '''
-        self.run_shell_command(["git", "merge", branch], ignore_error=True)
+        self._run_shell_command(["git", "merge", branch], ignore_error=True)
 
     def _git_clone(self, url: str, dir: str) -> None:
         '''
         git clone ``url`` ``dir``
         '''
-        self.run_shell_command(["git", "clone", url, dir])
+        self._run_shell_command(["git", "clone", url, dir])
 
     def _git_reset_hard(self, n: int) -> None:
         '''
         git reset --hard HEAD~``n``
         '''
-        self.run_shell_command(["git", "reset", "--hard", f"HEAD~{n}"])
+        self._run_shell_command(["git", "reset", "--hard", f"HEAD~{n}"])
 
     def _create_file(self, filename: str) -> None:
         '''
@@ -148,6 +122,10 @@ class TestCase(NoSetupTestCase):
         '''
         with open(filename, "w") as f:
             f.write(text + "\n")
+
+    #endregion
+
+    #region Setup helpers
 
     def _set_up_directory_structure(self) -> None:
         print("Setting up directory structure")
@@ -309,7 +287,7 @@ class TestCase(NoSetupTestCase):
 
         self._modified_repo_commit_hash = self._get_modified_repo_commit_hash()
 
-        self.run_shell_command(["coverage", "erase"], True)
+        self._run_shell_command(["coverage", "erase"], True)
 
         print()
 
@@ -317,16 +295,48 @@ class TestCase(NoSetupTestCase):
         os.chdir("test/test-repos")
         self._disable_outer_repo()
 
-    def run_gitsum(self, args: List[str]) -> str:
-        gitsum_command = [f"..{os.path.sep}..{os.path.sep}lib{os.path.sep}gitsum.py"]
+    #endregion
+
+    def run_gitsum(self, args: List[str], shell: bool = False) -> str:
+        slash = os.path.sep
+        if shell:
+            gitsum_path = f"..{slash}..{slash}gitsum"
+        else:
+            gitsum_path = f"..{slash}..{slash}lib{slash}gitsum.py"
         coverage_command = ["coverage", "run", "--append", "--branch", "--data-file=../../.coverage"]
-        return self.run_shell_command(coverage_command + gitsum_command + args)
+        return self._run_shell_command(coverage_command + [gitsum_path] + args, shell=shell)
+
+    def _make_assert_message(self, actual: str, expected: str) -> str:
+        out = "\n" + ("~" * 31) + " OUTPUT " + ("~" * 31) + "\n"
+        out += actual + "\n"
+
+        out += ("~" * 30) + " EXPECTED " + ("~" * 30) + "\n"
+        out += expected + "\n"
+        out += ("~" * 70) + "\n"
+
+        return out
+
+    def assert_lines_equal(self, expected: str, actual: str) -> None:
+        """
+        Asserts that each line in each string is the same, ignoring trailing whitespace. Also adds a message with the expected and actual outputs.
+        """
+        diff = self._make_assert_message(actual, expected)
+
+        result_lines = [line.rstrip() for line in actual.splitlines()]
+        expected_lines = [line.rstrip() for line in expected.splitlines()]
+
+        # Check number of lines
+        self.assertEqual(len(expected_lines), len(result_lines), diff)
+
+        # Check line contents
+        for (expected, actual) in zip(expected_lines, result_lines):
+            self.assertEqual(expected, actual, diff)
 
     def assert_gitsum_output(self, expected: str, actual: str) -> None:
         expected = expected.replace(self.MODIFIED_REPO_COMMIT_HASH, self._modified_repo_commit_hash)
         self.assert_lines_equal(expected, actual)
 
-    def setUp(self):
+    def setUp(self) -> None:
         global _setup_complete
         try:
             if not self._setup_complete:
@@ -337,6 +347,6 @@ class TestCase(NoSetupTestCase):
             os.chdir(_working_dir)
             raise
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         os.chdir(_working_dir)
         self._activate_outer_repo()
