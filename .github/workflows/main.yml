@@ -89,7 +89,7 @@ jobs:
         filename: ${{ format('gitsum-{0}.json', runner.os) }}
         label: ${{ format('{0} build', runner.os) }}
         message: 'Passed'
-        color: 'green'
+        color: 'success'
     - name: Create platorm-specific build status badge (failure)
       if: ${{ failure() }}
       uses: schneegans/dynamic-badges-action@v1.6.0
