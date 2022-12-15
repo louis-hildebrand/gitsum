@@ -1,38 +1,49 @@
 from inspect import cleandoc
+import os
 
 from test.base_test_case import TestCase
 
 
 class OutsideFileTests(TestCase):
+    def _set_up_repos(self) -> None:
+        self._create_repo_with_deleted_file("test_outside_files/deleted")
+        self._create_repo_with_untracked_files("test_outside_files/foo/untracked")
+
+        os.makedirs("test_outside_files/all-outside", exist_ok=True)
+        self._create_file("test_outside_files/all-outside/hello.txt")
+        self._create_file("test_outside_files/all-outside/general-kenobi.txt")
+        self._create_file("test_outside_files/outside.txt")
+        os.makedirs("test_outside_files/foo/all-outside", exist_ok=True)
+        self._create_file("test_outside_files/foo/all-outside/hello.txt")
+        os.makedirs("test_outside_files/foo/all-outside/nested-outside", exist_ok=True)
+        self._create_file("test_outside_files/foo/all-outside/nested-outside/general-kenobi.txt")
+        os.makedirs("test_outside_files/foo/empty-outside", exist_ok=True)
+        self._create_file("test_outside_files/foo/outside.txt")
+
     _EXPECTED_FILES = cleandoc("""
         OUTSIDE: all-outside/
+        OUTSIDE: foo/all-outside/
+        OUTSIDE: foo/empty-outside/
+        OUTSIDE: foo/outside.txt
         OUTSIDE: outside.txt
-        OUTSIDE: remote/all-outside/
-        OUTSIDE: remote/empty-outside/
-        OUTSIDE: remote/outside.txt"""
-    )
+    """)
 
-    _EXPECTED_REPOS = cleandoc(f"""
-        Found 7 Git repositories.
-        !  deleted                        [LR]  master        *
-        !  modified                       [LR]  ({TestCase.MODIFIED_REPO_COMMIT_HASH})      *
-           remote/empty                   [LB]  (no commits)
-        !  remote/not empty/ahead behind        main            >1 <3
-        !  remote/not empty/staged              feature       *
-        !  unmerged                       [LR]  main          *
-        !  untracked                      [LR]  (no commits)  *"""
-    )
+    _EXPECTED_REPOS = cleandoc("""
+        Found 2 Git repositories.
+        !  deleted        [LR]  master        *
+        !  foo/untracked  [LR]  (no commits)  *
+    """)
 
     _EXPECTED_COMBINED = _EXPECTED_FILES + "\n" + _EXPECTED_REPOS
 
     def test_outside_files(self) -> None:
-        result_str = self.run_gitsum(["--outside-files"])
-        self.assert_gitsum_output(self._EXPECTED_COMBINED, result_str)
+        actual = self.run_gitsum(["--outside-files"], working_dir="test_outside_files")
+        self.assert_lines_equal(self._EXPECTED_COMBINED, actual)
 
     def test_only_outside_files(self) -> None:
-        result_str = self.run_gitsum(["--only-outside-files"])
-        self.assert_gitsum_output(self._EXPECTED_FILES, result_str)
+        actual = self.run_gitsum(["--only-outside-files"], working_dir="test_outside_files")
+        self.assert_lines_equal(self._EXPECTED_FILES, actual)
 
     def test_no_outside_files(self) -> None:
-        actual = self.run_gitsum(["--only-outside-files"], working_dir="modified")
+        actual = self.run_gitsum(["--only-outside-files"], working_dir="test_outside_files/deleted")
         self.assertEqual("", actual)
