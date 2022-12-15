@@ -18,6 +18,8 @@ class TestCase(unittest.TestCase):
     _GIT_USER_NAME = "gitsum tester"
     _GITSUM_REPO_ROOT = os.getcwd()
 
+    _coverage_erased = False
+
     def __init__(self, methodName: str):
         super().__init__(methodName)
         self.maxDiff = 0
@@ -365,6 +367,10 @@ class TestCase(unittest.TestCase):
         except:
             self.tearDown()
             raise
+        # Erase coverage data if this is the start of the test run
+        if not TestCase._coverage_erased:
+            self._run_shell_command(["coverage", "erase"])
+            TestCase._coverage_erased = True
 
     def tearDown(self):
         """
@@ -372,5 +378,3 @@ class TestCase(unittest.TestCase):
         """
         os.chdir(TestCase._GITSUM_REPO_ROOT)
         self._activate_outer_repo()
-
-# TODO: Somehow I need to clear the coverage data before all the tests
