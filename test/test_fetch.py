@@ -18,7 +18,7 @@ class FetchTests(TestCase):
             Found 4 Git repositories.
                remote/copy for pushing        main
                remote/empty             [LB]  (no commits)
-            !  remote/not empty               main            <1
+            !  remote/not empty               main               <1
             !  untracked                [LR]  (no commits)  *
         """)
         actual = self.run_gitsum(["--fetch"], working_dir="test_fetch")

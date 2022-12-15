@@ -42,12 +42,13 @@ def get_repo_name(path_str: str) -> str:
     return repo_path.relative_to(working_dir).as_posix()
 
 
-def _try_fetch(remote: pygit2.Remote, repo_name: str) -> None:
+def _try_fetch(remote: pygit2.Remote) -> bool:
     try:
         remote.fetch()  # type: ignore
+        return True
     except pygit2.GitError:
         # TODO: Check credentials? Skip?
-        msg.warn(f"Failed to fetch repo '{repo_name}'")
+        return False
 
 
 def get_repo_status(repo: pygit2.Repository, fetch: bool) -> RepoStatus:
@@ -61,13 +62,13 @@ def get_repo_status(repo: pygit2.Repository, fetch: bool) -> RepoStatus:
     else:
         branch_name = repo.head.shorthand
         local_branch = repo.lookup_branch(branch_name)
-        upstream_branch = local_branch.upstream
-        if upstream_branch:
+        if local_branch.upstream:
             branch_has_upstream = True
             if fetch:
-                remote = repo.remotes[upstream_branch.remote_name]
-                _try_fetch(remote, name)
-            (local_ahead, local_behind) = repo.ahead_behind(local_branch.target, upstream_branch.target) # type: ignore
+                remote = repo.remotes[local_branch.upstream.remote_name]
+                if not _try_fetch(remote):
+                    msg.warn(f"Failed to fetch repo '{name}'")
+            (local_ahead, local_behind) = repo.ahead_behind(local_branch.target, local_branch.upstream.target) # type: ignore
     is_local = not len(repo.remotes) > 0
     has_changes = len(repo.status()) > 0
     return RepoStatus(name, branch_name, is_local, has_changes, branch_has_upstream, local_ahead, local_behind)
