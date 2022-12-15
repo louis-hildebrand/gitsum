@@ -23,8 +23,9 @@ class TestCase(unittest.TestCase):
     def __init__(self, methodName: str):
         super().__init__(methodName)
         self.maxDiff = 0
-        self._old_repo_path: str = ""
-        self._new_repo_path: str = ""
+        self._old_repo_path = ""
+        self._new_repo_path = ""
+        self._changes_pushed = ""
 
     #region Shell commands
 
@@ -263,8 +264,6 @@ class TestCase(unittest.TestCase):
         self._git_init(dir)
         self._create_file(os.path.join(dir, "hello.txt"))
 
-    # TODO: Clean up functions past this point
-
     def _push_new_changes(self, dir: str) -> None:
         print(f"Pushing new changes from '{dir}'")
         starting_dir = os.getcwd()
@@ -275,14 +274,19 @@ class TestCase(unittest.TestCase):
         self._git_commit("New test commit")
         self._git_push()
         os.chdir(starting_dir)
+        self._changes_pushed = dir
 
-    def _undo_changes(self, dir: str) -> None:
+    def _undo_changes_in_remote(self) -> None:
+        dir = self._changes_pushed
+        if not dir:
+            return
         print(f"Undoing changes in '{dir}'")
         starting_dir = os.getcwd()
         os.chdir(dir)
         self._git_reset_hard(1)
         self._git_push(force=True)
         os.chdir(starting_dir)
+        self._changes_pushed = ""
 
     def _disable_outer_repo(self) -> None:
         outer_repo = pygit2.discover_repository(".")
@@ -358,7 +362,9 @@ class TestCase(unittest.TestCase):
         """
         Moves to the test/test-repos directory, creates the required test repos, and disables the gitsum repo.
         """
-        os.makedirs("test/test-repos", exist_ok=True)
+        os.chdir(TestCase._GITSUM_REPO_ROOT)
+        if not os.path.isdir("test/test-repos"):
+            os.makedirs("test/test-repos")
         os.chdir("test/test-repos")
         try:
             self._set_up_repos()
@@ -376,5 +382,5 @@ class TestCase(unittest.TestCase):
         """
         Moves back to the root of the gitsum repo and re-activates the gitsum repo.
         """
-        os.chdir(TestCase._GITSUM_REPO_ROOT)
         self._activate_outer_repo()
+        self._undo_changes_in_remote()
