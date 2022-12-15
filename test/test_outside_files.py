@@ -32,3 +32,7 @@ class OutsideFileTests(TestCase):
     def test_only_outside_files(self) -> None:
         result_str = self.run_gitsum(["--only-outside-files"])
         self.assert_gitsum_output(self._EXPECTED_FILES, result_str)
+
+    def test_no_outside_files(self) -> None:
+        actual = self.run_gitsum(["--only-outside-files"], working_dir="modified")
+        self.assertEqual("", actual)
