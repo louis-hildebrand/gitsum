@@ -5,7 +5,8 @@ from dataclasses import dataclass
 from pathlib import Path
 import os
 import pygit2  # type: ignore
-import sys
+
+import lib.message as msg
 
 
 @dataclass
@@ -32,17 +33,13 @@ class RepoStatus:
         return self.to_string(0, 0)
 
 
-def _warn(msg: str) -> None:
-    print(f"WARN: {msg}", file=sys.stderr)
-
-
-def _get_repo_name(repo: pygit2.Repository) -> str:
+def get_repo_name(path_str: str) -> str:
+    repo_path = Path(path_str)
     working_dir = Path(os.getcwd())
-    path = Path(repo.path)
     # Remove .git folder
-    if path.match(".git"):
-        path = path.parent
-    return path.relative_to(working_dir).as_posix()
+    if repo_path.match(".git"):
+        repo_path = repo_path.parent
+    return repo_path.relative_to(working_dir).as_posix()
 
 
 def _try_fetch(remote: pygit2.Remote, repo_name: str) -> None:
@@ -50,11 +47,11 @@ def _try_fetch(remote: pygit2.Remote, repo_name: str) -> None:
         remote.fetch()  # type: ignore
     except pygit2.GitError:
         # TODO: Check credentials? Skip?
-        _warn(f"Failed to fetch repo '{repo_name}'")
+        msg.warn(f"Failed to fetch repo '{repo_name}'")
 
 
 def get_repo_status(repo: pygit2.Repository, fetch: bool) -> RepoStatus:
-    name = _get_repo_name(repo)
+    name = get_repo_name(repo.path)
     branch_has_upstream = False
     (local_ahead, local_behind) = (0, 0)
     if repo.head_is_unborn:

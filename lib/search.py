@@ -6,6 +6,9 @@ from typing import List, Tuple, TypeVar
 import os
 import pygit2  # type: ignore
 
+import lib.message as msg
+import lib.status as status
+
 
 T = TypeVar("T")
 
@@ -15,15 +18,19 @@ def _flatten(l: List[List[T]]) -> List[T]:
 
 
 def _do_get_git_repos(dir: Path) -> Tuple[List[pygit2.Repository], List[Path]]:
-    # TODO: for this specific folder, pygit2.discover_repository() returns a path but the Repository constructor rejects that same path. Why???
-    if "Special Characters" in str(dir):
-        return ([], [])
     if not os.path.isdir(dir):
         return ([], [dir])
 
     repo_path = pygit2.discover_repository(str(dir))
     if repo_path:
-        return ([pygit2.Repository(repo_path)], [])
+        try:
+            return ([pygit2.Repository(repo_path)], [])
+        # Somehow this happens for one of my local repos (but not for copies of that repo!).
+        # I have no idea what to do about it other than catching the exception.
+        except pygit2.GitError:
+            repo_name = status.get_repo_name(repo_path)
+            msg.warn(f"Failed to load repository '{repo_name}'")
+            return ([], [dir])
 
     results = [_do_get_git_repos(subdir) for subdir in dir.iterdir()]
     # If there are no Git repos within this directory, just say that this entire directory is an outside file
