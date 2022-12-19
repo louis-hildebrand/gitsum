@@ -13,9 +13,9 @@ class FetchTests(TestCase):
     def test_fetch(self):
         expected = cleandoc(f"""
             Found 3 Git repositories.
-               remote/empty      [LB]  (no commits)
-            !  remote/not empty        main               <4
-            !  untracked         [LR]  (no commits)  *
+               remote/empty      (no commits)     local branch
+            !  remote/not empty  main             <4
+            !  untracked         (no commits)  *  local repo
         """)
         actual = self.run_gitsum(["--fetch"], working_dir="test_fetch")
         self.assert_lines_equal(expected, actual)

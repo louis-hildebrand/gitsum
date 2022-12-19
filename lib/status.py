@@ -27,7 +27,21 @@ class RepoStatus:
         )
 
     def to_string(self, name_width: int, head_width: int) -> str:
-        return f"{'!' if not self._is_up_to_date() else ' '}  {self.name:<{name_width}}  {'[LR]' if self.is_local else '[LB]' if not self.branch_has_upstream else '    '}  {self.head:<{head_width}} {' *' if self.has_changes else '  '}{f' >{self.local_ahead}' if self.local_ahead > 0 else '   '}{f' <{self.local_behind}' if self.local_behind > 0 else '   '}"
+        flag = "!" if not self._is_up_to_date() else " "
+        name = f"{self.name:<{name_width}}"
+        head = f"{self.head:<{head_width}}"
+        local_status = "*" if self.has_changes else " "
+        if self.is_local:
+            remote_status = "local repo"
+        elif not self.branch_has_upstream:
+            remote_status = "local branch"
+        else:
+            remote_status = ""
+            if self.local_ahead > 0:
+                remote_status += f">{self.local_ahead} "
+            if self.local_behind > 0:
+                remote_status += f"<{self.local_behind}"
+        return f"{flag}  {name}  {head}  {local_status}  {remote_status}"
 
     def __str__(self) -> str:
         return self.to_string(0, 0)

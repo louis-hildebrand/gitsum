@@ -30,8 +30,8 @@ class OutsideFileTests(TestCase):
 
     _EXPECTED_REPOS = cleandoc("""
         Found 2 Git repositories.
-        !  deleted        [LR]  master        *
-        !  foo/untracked  [LR]  (no commits)  *
+        !  deleted        master        *  local repo
+        !  foo/untracked  (no commits)  *  local repo
     """)
 
     _EXPECTED_COMBINED = _EXPECTED_FILES + "\n" + _EXPECTED_REPOS

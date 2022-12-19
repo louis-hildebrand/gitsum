@@ -27,13 +27,13 @@ class NoArgsTests(TestCase):
     def test_no_args(self):
         expected = cleandoc(f"""
             Found 7 Git repositories.
-            !  deleted                        [LR]  master        *
-            !  modified                       [LR]  ({self._modified_repo_commit_hash})      *
-               remote/empty                   [LB]  (no commits)
-            !  remote/not empty/ahead behind        main            >1 <3
-            !  remote/not empty/staged              feature       *
-            !  unmerged                       [LR]  main          *
-            !  untracked                      [LR]  (no commits)  *
+            !  deleted                        master        *  local repo
+            !  modified                       ({self._modified_repo_commit_hash})      *  local repo
+               remote/empty                   (no commits)     local branch
+            !  remote/not empty/ahead behind  main             >1 <3
+            !  remote/not empty/staged        feature       *
+            !  unmerged                       main          *  local repo
+            !  untracked                      (no commits)  *  local repo
         """)
         actual = self.run_gitsum([], working_dir="test_no_args")
         self.assert_lines_equal(expected, actual)
@@ -46,7 +46,7 @@ class NoArgsTests(TestCase):
     def test_inside_repo(self):
         expected = cleandoc("""
             Found 1 Git repository.
-            !  .  [LR]  master  *
+            !  .  master  *  local repo
         """)
         actual = self.run_gitsum([], working_dir="test_no_args/deleted")
         self.assert_lines_equal(expected, actual)
