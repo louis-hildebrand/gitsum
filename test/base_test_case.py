@@ -12,8 +12,8 @@ import uuid
 class TestCase(unittest.TestCase):
     MODIFIED_REPO_COMMIT_HASH = "MODIFIED_REPO_COMMIT_HASH"
 
-    _EMPTY_REPO_URL = "https://louis-hildebrand@github.com/louis-hildebrand/empty.git"
-    _NON_EMPTY_REPO_URL = "https://louis-hildebrand@github.com/louis-hildebrand/test.git"
+    _EMPTY_REPO_URL = "https://github.com/louis-hildebrand/empty.git"
+    _NON_EMPTY_REPO_URL = "https://github.com/louis-hildebrand/test.git"
     _GIT_USER_EMAIL = "gitsum tester"
     _GIT_USER_NAME = "gitsum tester"
     _GITSUM_REPO_ROOT = os.getcwd()
