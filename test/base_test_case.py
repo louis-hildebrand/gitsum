@@ -6,14 +6,14 @@ import shutil
 import stat
 import subprocess
 import unittest
-import uuid
 
 
 class TestCase(unittest.TestCase):
     MODIFIED_REPO_COMMIT_HASH = "MODIFIED_REPO_COMMIT_HASH"
 
-    _EMPTY_REPO_URL = "https://github.com/louis-hildebrand/empty.git"
-    _NON_EMPTY_REPO_URL = "https://github.com/louis-hildebrand/test.git"
+    _EMPTY_REPO_URL = "https://github.com/louis-hildebrand/gitsum-test-empty.git"
+    _NON_EMPTY_REPO_URL = "https://github.com/louis-hildebrand/gitsum-test1.git"
+    _NON_EMPTY_ADVANCED_REPO_URL = "https://github.com/louis-hildebrand/gitsum-test2.git"
     _GIT_USER_EMAIL = "gitsum tester"
     _GIT_USER_NAME = "gitsum tester"
     _GITSUM_REPO_ROOT = os.getcwd()
@@ -25,7 +25,6 @@ class TestCase(unittest.TestCase):
         self.maxDiff = 0
         self._old_repo_path = ""
         self._new_repo_path = ""
-        self._changes_pushed = ""
 
     #region Shell commands
 
@@ -100,14 +99,11 @@ class TestCase(unittest.TestCase):
         '''
         self._run_shell_command(["git", "reset", "--hard", f"HEAD~{n}"])
 
-    def _git_push(self, force: bool = False) -> None:
+    def _git_remote_set_url(self, remote: str, url: str) -> None:
         '''
-        git push origin HEAD [--force]
+        git remote set-url ``remote`` ``url``
         '''
-        args = ["git", "push", "origin", "HEAD"]
-        if force:
-            args += ["--force"]
-        self._run_shell_command(args)
+        self._run_shell_command(["git", "remote", "set-url", remote, url])
 
     def _create_file(self, filename: str) -> None:
         '''
@@ -264,29 +260,12 @@ class TestCase(unittest.TestCase):
         self._git_init(dir)
         self._create_file(os.path.join(dir, "hello.txt"))
 
-    def _push_new_changes(self, dir: str) -> None:
-        print(f"Pushing new changes from '{dir}'")
+    def _make_changes_in_remote(self, dir: str) -> None:
+        print(f"Switching to advanced remote in '{dir}'")
         starting_dir = os.getcwd()
         os.chdir(dir)
-        filename = f"{uuid.uuid4()}.txt"
-        self._create_file(filename)
-        self._git_add_all()
-        self._git_commit("New test commit")
-        self._git_push()
+        self._git_remote_set_url("origin", TestCase._NON_EMPTY_ADVANCED_REPO_URL)
         os.chdir(starting_dir)
-        self._changes_pushed = dir
-
-    def _undo_changes_in_remote(self) -> None:
-        dir = self._changes_pushed
-        if not dir:
-            return
-        print(f"Undoing changes in '{dir}'")
-        starting_dir = os.getcwd()
-        os.chdir(dir)
-        self._git_reset_hard(1)
-        self._git_push(force=True)
-        os.chdir(starting_dir)
-        self._changes_pushed = ""
 
     def _disable_outer_repo(self) -> None:
         outer_repo = pygit2.discover_repository(".")
@@ -379,8 +358,4 @@ class TestCase(unittest.TestCase):
             TestCase._coverage_erased = True
 
     def tearDown(self):
-        """
-        Moves back to the root of the gitsum repo and re-activates the gitsum repo.
-        """
         self._activate_outer_repo()
-        self._undo_changes_in_remote()
