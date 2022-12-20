@@ -3,13 +3,11 @@ name: Test gitsum
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
   workflow_dispatch:
     inputs:
       debug_enabled:
         type: boolean
-        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'     
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
         required: false
         default: false
 
@@ -52,7 +50,7 @@ jobs:
       run: |
         coverage report
         coverage json
-    # Generate test coverage
+    # Generate test coverage badge
     # Do this on Ubuntu because that's usually the fastest build
     - name: Read coverage display
       if: ${{ runner.os == 'Linux' }}
