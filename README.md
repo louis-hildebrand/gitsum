@@ -19,18 +19,24 @@ Move to a directory in which there are Git repositories and then run `gitsum`.
 This will print out an overview of the status of each repository within the current directory (or its subdirectories). For example:
 ```
 Found 7 Git repositories.
-!  deleted                        [LR]  master        *
-!  modified                       [LR]  (d02092)      *
-   remote/empty                   [LB]  (no commits)
-!  remote/not empty/ahead behind        main            >1 <3
-!  remote/not empty/staged              feature       *
-!  unmerged                       [LR]  main          *
-!  untracked                      [LR]  (no commits)  *
+!  deleted                        master        *  local repo
+!  modified                       (d02092)      *  local repo
+   remote/empty                   (no commits)     local branch
+!  remote/not empty/ahead behind  main             >1 <3
+!  remote/not empty/staged        feature       *
+!  unmerged                       main          *  local repo
+!  untracked                      (no commits)  *  local repo
 ```
 
-- `[LR]` indicates that the given repo has _no_ remotes (i.e., this is a local repo), while `[LB]` indicates that the repo has one or more remotes but the current `HEAD` has no upstream (e.g., it has not been pushed, it is detached).
-- `*` indicates that there are local changes (e.g., untracked files, modified files, deleted files).
-- `>1` and `<3` say that the given repo is 1 commit ahead and 3 commits behind its upstream branch, respectively.
+The standard output includes:
+- The flag `!` if there are local changes or if the current branch is ahead of or behind its upstream branch
+- The directory path (relative to the current working directory)
+- The current branch (or the current commit hash if the repo is in detached HEAD mode)
+- The flag `*` if there are local changes (e.g., untracked files, modified files, deleted files)
+- The remote status, which can be:
+    - `local repo` if the repository has no remotes
+    - `local branch` if the repository has at least one remote but the current branch has no upstream
+    - The number of commits ahead and behind the upstream branch (e.g., `>1 <3` say that the given repo is 1 commit ahead and 3 commits behind)
 
 ## General Usage
 ### Getting Help
