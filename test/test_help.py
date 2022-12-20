@@ -8,12 +8,12 @@ from test.base_test_case import TestCase
 
 class HelpTests(TestCase):
     def test_help(self):
-        expected = cleandoc("""
+        expected = cleandoc(f"""
             usage: gitsum [-h] [-f] [-o] [-O]
 
             View a summary of statuses for multiple Git repositories.
 
-            optional arguments:
+            ^(?:options|optional arguments):$
               -h, --help            show this help message and exit
               -f, --fetch           fetch before getting status
               -o, --outside-files   list files and directories that are not inside a Git
@@ -23,4 +23,4 @@ class HelpTests(TestCase):
                                     repository and exit"""
         )
         actual = self.run_gitsum(["--help"], shell=True)
-        self.assert_lines_equal(expected, actual)
+        self.assert_lines_equal(expected, actual, regex=True)

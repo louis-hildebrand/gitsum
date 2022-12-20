@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any, List
 import os
 import pygit2  # type: ignore
+import re
 import shutil
 import stat
 import subprocess
@@ -315,9 +316,11 @@ class TestCase(unittest.TestCase):
 
         return out
 
-    def assert_lines_equal(self, expected: str, actual: str) -> None:
+    def assert_lines_equal(self, expected: str, actual: str, regex: bool = False) -> None:
         """
         Asserts that each line in each string is the same, ignoring trailing whitespace. Also adds a message with the expected and actual outputs.
+
+        If `regex` is `True`, lines starting with `^` and ending with `$` will be treated as regular expressions.
         """
         diff = self._make_assert_message(actual, expected)
 
@@ -329,7 +332,12 @@ class TestCase(unittest.TestCase):
 
         # Check line contents
         for (expected, actual) in zip(expected_lines, result_lines):
-            self.assertEqual(expected, actual, diff)
+            if expected.startswith("^") and expected.endswith("$"):
+                regular_expression = re.compile(expected)
+                self.assertTrue(regular_expression.match(actual),
+                    f"Expected string matching regular expression '{expected}' but received '{actual}'.")
+            else:
+                self.assertEqual(expected, actual, diff)
 
     def _set_up_repos(self) -> None:
         """
