@@ -298,9 +298,9 @@ class TestCase(unittest.TestCase):
         root_path = Path(TestCase._GITSUM_REPO_ROOT)
 
         if shell:
-            command = [str(root_path.joinpath("gitsum").absolute())]
+            command = ["gitsum"]
         else:
-            gitsum_path = str(root_path.joinpath("gitsum.py").absolute())
+            gitsum_path = str(root_path.joinpath("src/dev_main.py").absolute())
             coverage_path = str(root_path.joinpath(".coverage").absolute())
             command = ["coverage", "run", "--append", "--branch", f"--data-file={coverage_path}", gitsum_path]
         return self._run_shell_command(command + args, shell=shell, working_dir=working_dir)

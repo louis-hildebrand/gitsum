@@ -6,7 +6,7 @@ from pathlib import Path
 import os
 import pygit2  # type: ignore
 
-import lib.message as msg
+import gitsum.message as msg
 
 
 @dataclass
