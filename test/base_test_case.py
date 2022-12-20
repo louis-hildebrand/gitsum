@@ -273,9 +273,12 @@ class TestCase(unittest.TestCase):
         if outer_repo:
             print(f"Disabling the outer repo at '{outer_repo}'")
             ends_with_slash = outer_repo.endswith("/") or outer_repo.endswith("\\")
-            self._old_repo_path = outer_repo[:-1] if ends_with_slash else outer_repo
-            self._new_repo_path = self._old_repo_path + ".bak"
-            os.rename(self._old_repo_path, self._new_repo_path)
+            # Only set self._old_repo_path and self._new_repo_path after renaming so that, if the renaming fails, _activate_outer_repo() will not try to rename again
+            old_repo_path = outer_repo[:-1] if ends_with_slash else outer_repo
+            new_repo_path = old_repo_path + ".bak"
+            os.rename(old_repo_path, new_repo_path)
+            self._new_repo_path = new_repo_path
+            self._old_repo_path = old_repo_path
         else:
             print("No outer repo found to disable")
             pass
