@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any, List
 import os
 import pygit2  # type: ignore
+import re
 import shutil
 import stat
 import subprocess
@@ -272,9 +273,12 @@ class TestCase(unittest.TestCase):
         if outer_repo:
             print(f"Disabling the outer repo at '{outer_repo}'")
             ends_with_slash = outer_repo.endswith("/") or outer_repo.endswith("\\")
-            self._old_repo_path = outer_repo[:-1] if ends_with_slash else outer_repo
-            self._new_repo_path = self._old_repo_path + ".bak"
-            os.rename(self._old_repo_path, self._new_repo_path)
+            # Only set self._old_repo_path and self._new_repo_path after renaming so that, if the renaming fails, _activate_outer_repo() will not try to rename again
+            old_repo_path = outer_repo[:-1] if ends_with_slash else outer_repo
+            new_repo_path = old_repo_path + ".bak"
+            os.rename(old_repo_path, new_repo_path)
+            self._new_repo_path = new_repo_path
+            self._old_repo_path = old_repo_path
         else:
             print("No outer repo found to disable")
             pass
@@ -298,9 +302,9 @@ class TestCase(unittest.TestCase):
         root_path = Path(TestCase._GITSUM_REPO_ROOT)
 
         if shell:
-            command = [str(root_path.joinpath("gitsum").absolute())]
+            command = ["gitsum"]
         else:
-            gitsum_path = str(root_path.joinpath("gitsum.py").absolute())
+            gitsum_path = str(root_path.joinpath("src/dev_main.py").absolute())
             coverage_path = str(root_path.joinpath(".coverage").absolute())
             command = ["coverage", "run", "--append", "--branch", f"--data-file={coverage_path}", gitsum_path]
         return self._run_shell_command(command + args, shell=shell, working_dir=working_dir)
@@ -315,9 +319,11 @@ class TestCase(unittest.TestCase):
 
         return out
 
-    def assert_lines_equal(self, expected: str, actual: str) -> None:
+    def assert_lines_equal(self, expected: str, actual: str, regex: bool = False) -> None:
         """
         Asserts that each line in each string is the same, ignoring trailing whitespace. Also adds a message with the expected and actual outputs.
+
+        If `regex` is `True`, lines starting with `^` and ending with `$` will be treated as regular expressions.
         """
         diff = self._make_assert_message(actual, expected)
 
@@ -329,7 +335,12 @@ class TestCase(unittest.TestCase):
 
         # Check line contents
         for (expected, actual) in zip(expected_lines, result_lines):
-            self.assertEqual(expected, actual, diff)
+            if expected.startswith("^") and expected.endswith("$"):
+                regular_expression = re.compile(expected)
+                self.assertTrue(regular_expression.match(actual),
+                    f"Expected string matching regular expression '{expected}' but received '{actual}'.")
+            else:
+                self.assertEqual(expected, actual, diff)
 
     def _set_up_repos(self) -> None:
         """

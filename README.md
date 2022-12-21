@@ -7,11 +7,10 @@
 `gitsum` is a command-line tool that provides a summary of multiple Git repositories.
 
 ## Installation
-- Ensure you have Python 3.8+ installed.
-- Clone this repository.
-- Install the required dependencies using `pip install -r requirements.txt`.
-- (For *nix users) Grant execution permission to the script using `chmod u+x gitsum`.
-- Add this repository to your `PATH` environment variable.
+Ensure you have Python 3.8+ and pip installed. Then run
+```sh
+pip install gitsum
+```
 
 ## Basic Usage
 Move to a directory in which there are Git repositories and then run `gitsum`.
@@ -67,16 +66,11 @@ gitsum --fetch
 Note that this option is currently limited to public repositories. If `gitsum` is unable to fetch (e.g., because the repository is private), then a warning will simply be displayed. 
 
 ## Running the Tests
-Before running the tests, install the test dependencies using `pip install -r test-requirements.txt`. The tests can be run by issuing the command `pytest` (or `python -m unittest`, if you prefer). This must be done from the root of the repository.
+Before running the tests, clone the repository and install the test dependencies using `pip install -r test-requirements.txt`. You must also build the project with `python -m build` and then install the package with `pip install --find-links=dist gitsum`.
 
-Note that the tests are meant to be run in Python 3.8 (in some cases the output is sightly different on other versions, like 3.10!). If you normally use a different version of Python and are seeing tests failing due to small differences in the help message, consider setting up a virtual environment with
-```sh
-python3.8 -m venv .venv
-.venv/Scripts/activate  # or .venv/bin/activate, depending on your system
-```
-(where `python3.8` may need to be replaced with the path to your Python 3.8 installation.)
+The tests can be run by issuing the command `pytest` (or `python -m unittest`, if you prefer). This must be done from the root of the repository.
 
-`gitsum` is verified by a few integration tests which create Git repos and check that the command's output is as expected. To avoid the `gitsum` repo itself interfering with the output, the repo is temporarily disabled by renaming the `.git/` folder. This might not be possible if your IDE is using the `.git/` folder. If you get errors, you might need to disable your IDE's Git integration for this project. For example, in VS Code, you can add a file `.vscode/settings.json` in the root of the repo with the following contents:
+`gitsum` is verified by a few integration tests which create Git repos and check that the command's output is as expected. To avoid the `gitsum` repo itself interfering with the output, the repo is temporarily disabled by renaming the `.git/` folder to `.git.bak/`. This might not be possible if your IDE is using the `.git/` folder. If you get errors, you might need to disable your IDE's Git integration for this project. For example, in VS Code, you can add a file `.vscode/settings.json` in the root of the repo with the following contents:
 ```json
 {
     "git.enabled": false

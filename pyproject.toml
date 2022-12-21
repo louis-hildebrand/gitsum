@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gitsum"
+version = "1.0.0"
+description = "Summarize the status of multiple Git repositories."
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = ["git"]
+dependencies = [
+	"pygit2"
+]
+
+[project.scripts]
+gitsum = "gitsum.cli:main"
+
+# Want to exclude dev_main.py from the release
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["gitsum"]

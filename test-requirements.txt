@@ -1,2 +1,3 @@
-pytest
 coverage
+pygit2
+pytest

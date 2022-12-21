@@ -6,8 +6,8 @@ from typing import List, Tuple, TypeVar
 import os
 import pygit2  # type: ignore
 
-import lib.message as msg
-import lib.status as status
+import gitsum.message as msg
+import gitsum.status as status
 
 
 T = TypeVar("T")

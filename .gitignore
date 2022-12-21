@@ -2,3 +2,6 @@ __pycache__
 .vscode/
 .coverage
 .venv/
+dist/
+gitsum.egg-info/
+/test/test-repos/

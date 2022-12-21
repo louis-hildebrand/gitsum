@@ -2,8 +2,8 @@ from pathlib import Path
 import argparse
 import os
 
-import lib.search as search
-import lib.status as status
+import gitsum.search as search
+import gitsum.status as status
 
 
 def _show_git_summary(fetch: bool, list_outside_files: bool, only_outside_files: bool) -> None:
@@ -34,5 +34,5 @@ def main() -> None:
 
     _show_git_summary(args.fetch, args.outside_files, args.only_outside_files)
 
-
-main()
+if __name__ == "__main__":
+    main()
