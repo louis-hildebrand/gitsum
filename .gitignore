@@ -4,3 +4,4 @@ __pycache__
 .venv/
 dist/
 gitsum.egg-info/
+/test/test-repos/
