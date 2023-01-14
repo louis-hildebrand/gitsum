@@ -2,11 +2,9 @@
 Module for finding the status of a Git repository.
 """
 from dataclasses import dataclass
-from pathlib import Path
-import os
 import pygit2  # type: ignore
 
-import gitsum.message as msg
+import gitsum.output as output
 
 
 @dataclass
@@ -20,7 +18,7 @@ class RepoStatus:
     local_behind: int
 
     def __init__(self, repo: pygit2.Repository, fetch: bool) -> None:
-        self.name = get_repo_name(repo.path)
+        self.name = output.get_repo_name(repo.path)
         self.branch_has_upstream = False
         (self.local_ahead, self.local_behind) = (0, 0)
         if repo.head_is_unborn:
@@ -35,7 +33,7 @@ class RepoStatus:
                 if fetch:
                     remote = repo.remotes[local_branch.upstream.remote_name]
                     if not self._try_fetch(remote):
-                        msg.warn(f"Failed to fetch repo '{self.name}'")
+                        output.warn(f"Failed to fetch repo '{self.name}'")
                 (self.local_ahead, self.local_behind) = repo.ahead_behind(local_branch.target, local_branch.upstream.target) # type: ignore
         self.is_local = not len(repo.remotes) > 0
         self.has_changes = len(repo.status()) > 0
@@ -75,15 +73,3 @@ class RepoStatus:
 
     def __str__(self) -> str:
         return self.to_string(0, 0)
-
-
-def get_repo_name(path_str: str) -> str:
-    """
-    Returns the path to the given repo, relative to the current working directory.
-    """
-    repo_path = Path(path_str)
-    working_dir = Path(os.getcwd())
-    # Remove .git folder
-    if repo_path.match(".git"):
-        repo_path = repo_path.parent
-    return repo_path.relative_to(working_dir).as_posix()
