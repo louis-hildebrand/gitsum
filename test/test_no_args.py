@@ -55,7 +55,7 @@ class NoArgsTests(TestCase):
     def test_inside_repo_subfolder(self):
         expected = cleandoc("""
             Found 1 Git repository.
-            !  ../../empty  (no commits)     local branch
+               ../../empty  (no commits)     local branch
         """)
         actual = self.run_gitsum([], working_dir="test_no_args/remote/empty/subfolder")
         self.assert_lines_equal(expected, actual)
