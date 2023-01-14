@@ -2,8 +2,8 @@ from pathlib import Path
 import argparse
 import os
 
+from gitsum.status import RepoStatus
 import gitsum.search as search
-import gitsum.status as status
 
 
 def _show_git_summary(fetch: bool, list_outside_files: bool, only_outside_files: bool) -> None:
@@ -14,7 +14,7 @@ def _show_git_summary(fetch: bool, list_outside_files: bool, only_outside_files:
 
     num_repos = len(repos)
     print(f"Found {num_repos} Git {'repository' if num_repos == 1 else 'repositories'}.")
-    statuses = [status.get_repo_status(r, fetch) for r in repos]
+    statuses = [RepoStatus(r, fetch) for r in repos]
     if statuses:
         name_width = max([len(s.name) for s in statuses])
         head_width = max([len(s.head) for s in statuses])
