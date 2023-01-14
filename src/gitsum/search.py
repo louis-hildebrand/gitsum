@@ -6,8 +6,7 @@ from typing import List, Tuple, TypeVar
 import os
 import pygit2  # type: ignore
 
-import gitsum.message as msg
-import gitsum.status as status
+import gitsum.output as output
 
 
 T = TypeVar("T")
@@ -28,8 +27,8 @@ def _do_get_git_repos(dir: Path) -> Tuple[List[pygit2.Repository], List[Path]]:
         # Somehow this happens for one of my local repos (but not for copies of that repo!).
         # I have no idea what to do about it other than catching the exception.
         except pygit2.GitError:
-            repo_name = status.get_repo_name(repo_path)
-            msg.warn(f"Failed to load repository '{repo_name}'")
+            repo_name = output.get_repo_name(repo_path)
+            output.warn(f"Failed to load repository '{repo_name}'")
             return ([], [dir])
 
     results = [_do_get_git_repos(subdir) for subdir in dir.iterdir()]

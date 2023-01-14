@@ -2,11 +2,9 @@
 Module for finding the status of a Git repository.
 """
 from dataclasses import dataclass
-from pathlib import Path
-import os
 import pygit2  # type: ignore
 
-import gitsum.message as msg
+import gitsum.output as output
 
 
 @dataclass
@@ -18,6 +16,36 @@ class RepoStatus:
     branch_has_upstream: bool
     local_ahead: int
     local_behind: int
+
+    def __init__(self, repo: pygit2.Repository, fetch: bool) -> None:
+        self.name = output.get_repo_name(repo.path)
+        self.branch_has_upstream = False
+        (self.local_ahead, self.local_behind) = (0, 0)
+        if repo.head_is_unborn:
+            self.head = "(no commits)"
+        elif repo.head_is_detached:
+            self.head = f"({repo.head.target.hex[:6]})"  # type: ignore
+        else:
+            self.head = repo.head.shorthand
+            local_branch = repo.lookup_branch(self.head)
+            if local_branch.upstream:
+                self.branch_has_upstream = True
+                if fetch:
+                    remote = repo.remotes[local_branch.upstream.remote_name]
+                    if not self._try_fetch(remote):
+                        output.warn(f"Failed to fetch repo '{self.name}'")
+                (self.local_ahead, self.local_behind) = repo.ahead_behind(local_branch.target, local_branch.upstream.target) # type: ignore
+        self.is_local = not len(repo.remotes) > 0
+        self.has_changes = len(repo.status()) > 0
+
+    @staticmethod
+    def _try_fetch(remote: pygit2.Remote) -> bool:
+        try:
+            remote.fetch()  # type: ignore
+            return True
+        except pygit2.GitError:
+            # TODO: Check credentials? Skip?
+            return False
 
     def _is_up_to_date(self) -> bool:
         return not self.has_changes and (
@@ -45,44 +73,3 @@ class RepoStatus:
 
     def __str__(self) -> str:
         return self.to_string(0, 0)
-
-
-def get_repo_name(path_str: str) -> str:
-    repo_path = Path(path_str)
-    working_dir = Path(os.getcwd())
-    # Remove .git folder
-    if repo_path.match(".git"):
-        repo_path = repo_path.parent
-    return repo_path.relative_to(working_dir).as_posix()
-
-
-def _try_fetch(remote: pygit2.Remote) -> bool:
-    try:
-        remote.fetch()  # type: ignore
-        return True
-    except pygit2.GitError:
-        # TODO: Check credentials? Skip?
-        return False
-
-
-def get_repo_status(repo: pygit2.Repository, fetch: bool) -> RepoStatus:
-    name = get_repo_name(repo.path)
-    branch_has_upstream = False
-    (local_ahead, local_behind) = (0, 0)
-    if repo.head_is_unborn:
-        branch_name = "(no commits)"
-    elif repo.head_is_detached:
-        branch_name = f"({repo.head.target.hex[:6]})"  # type: ignore
-    else:
-        branch_name = repo.head.shorthand
-        local_branch = repo.lookup_branch(branch_name)
-        if local_branch.upstream:
-            branch_has_upstream = True
-            if fetch:
-                remote = repo.remotes[local_branch.upstream.remote_name]
-                if not _try_fetch(remote):
-                    msg.warn(f"Failed to fetch repo '{name}'")
-            (local_ahead, local_behind) = repo.ahead_behind(local_branch.target, local_branch.upstream.target) # type: ignore
-    is_local = not len(repo.remotes) > 0
-    has_changes = len(repo.status()) > 0
-    return RepoStatus(name, branch_name, is_local, has_changes, branch_has_upstream, local_ahead, local_behind)
