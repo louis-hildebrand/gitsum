@@ -14,6 +14,7 @@ class NoArgsTests(TestCase):
         self._create_repo_with_deleted_file("test_no_args/deleted")
         self._create_repo_with_modified_file("test_no_args/modified")
         self._clone_empty_repo("test_no_args/remote/empty")
+        os.makedirs("test_no_args/remote/empty/subfolder", exist_ok=True)
         self._clone_repo_ahead_behind("test_no_args/remote/not empty/ahead behind")
         self._clone_repo_with_staged_changes("test_no_args/remote/not empty/staged")
         self._create_repo_with_merge_conflicts("test_no_args/unmerged")
@@ -43,10 +44,18 @@ class NoArgsTests(TestCase):
         actual = self.run_gitsum([], working_dir="test_no_args/not a repo")
         self.assert_lines_equal(expected, actual)
 
-    def test_inside_repo(self):
+    def test_inside_repo_root(self):
         expected = cleandoc("""
             Found 1 Git repository.
-            !  .  master  *  local repo
+            !  ../deleted  master  *  local repo
         """)
         actual = self.run_gitsum([], working_dir="test_no_args/deleted")
+        self.assert_lines_equal(expected, actual)
+
+    def test_inside_repo_subfolder(self):
+        expected = cleandoc("""
+            Found 1 Git repository.
+            !  ../../empty  (no commits)     local branch
+        """)
+        actual = self.run_gitsum([], working_dir="test_no_args/remote/empty/subfolder")
         self.assert_lines_equal(expected, actual)
