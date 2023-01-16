@@ -1,9 +1,23 @@
 from pathlib import Path
 import argparse
 import os
+import sys
 
 from gitsum.status import RepoStatus
 import gitsum.search as search
+
+
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="gitsum",
+        description="View a summary of statuses for multiple Git repositories."
+    )
+
+    parser.add_argument("-f", "--fetch", action="store_true", help="fetch before getting status")
+    parser.add_argument("-o", "--outside-files", action="store_true", help="list files and directories that are not inside a Git repository")
+    parser.add_argument("-O", "--only-outside-files", action="store_true", help="list files and directories that are not inside a Git repository and exit")
+
+    return parser.parse_args()
 
 
 def _show_git_summary(fetch: bool, list_outside_files: bool, only_outside_files: bool) -> None:
@@ -23,16 +37,13 @@ def _show_git_summary(fetch: bool, list_outside_files: bool, only_outside_files:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        prog="gitsum",
-        description="View a summary of statuses for multiple Git repositories."
-    )
-    parser.add_argument("-f", "--fetch", action="store_true", help="fetch before getting status")
-    parser.add_argument("-o", "--outside-files", action="store_true", help="list files and directories that are not inside a Git repository")
-    parser.add_argument("-O", "--only-outside-files", action="store_true", help="list files and directories that are not inside a Git repository and exit")
-    args = parser.parse_args()
+    try:
+        args = _parse_args()
 
-    _show_git_summary(args.fetch, args.outside_files, args.only_outside_files)
+        _show_git_summary(args.fetch, args.outside_files, args.only_outside_files)
+    except KeyboardInterrupt:
+        print("Cancelled.")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
