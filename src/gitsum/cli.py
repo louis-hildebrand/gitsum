@@ -44,6 +44,3 @@ def main() -> None:
     except KeyboardInterrupt:
         print("Cancelled.")
         sys.exit(1)
-
-if __name__ == "__main__":
-    main()
