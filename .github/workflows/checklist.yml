@@ -13,7 +13,7 @@ jobs:
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
         with:
-          filePath: /.github/checklists/pull-request.md
+          filePath: .github/checklists/pull-request.md
 
   release_checklist:
     if: startsWith(github.head_ref, 'release/')
@@ -25,4 +25,4 @@ jobs:
       - name: Comment PR
         uses: thollander/actions-comment-pull-request@v2
         with:
-          filePath: /.github/checklists/release.md
+          filePath: .github/checklists/release.md
