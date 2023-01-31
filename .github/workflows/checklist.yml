@@ -1,0 +1,28 @@
+name: Create pull request or release checklist
+
+on: pull_request
+
+jobs:
+  pr_checklist:
+    if: "!startsWith(github.head_ref, 'release/')"
+    runs-on: ubuntu-latest
+    name: Create pull request checklist
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Comment PR
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: /.github/checklists/pull-request.md
+
+  release_checklist:
+    if: startsWith(github.head_ref, 'release/')
+    runs-on: ubuntu-latest
+    name: Create release checklist
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Comment PR
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: /.github/checklists/release.md
