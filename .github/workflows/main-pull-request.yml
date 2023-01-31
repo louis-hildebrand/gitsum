@@ -1,4 +1,4 @@
-name: Test gitsum
+name: Continuous integration (pull request)
 
 on:
   pull_request:
