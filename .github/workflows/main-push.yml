@@ -1,4 +1,4 @@
-name: Test gitsum
+name: Continuous integration (push)
 
 on:
   push:
