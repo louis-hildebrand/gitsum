@@ -19,7 +19,7 @@ authors = [
 
 [project.urls]
 "Bug Tracker" = "https://github.com/louis-hildebrand/gitsum/issues"
-Changelog = "https://github.com/louis-hildebrand/gitsum/CHANGELOG.md"
+Changelog = "https://github.com/louis-hildebrand/gitsum/blob/main/CHANGELOG.md"
 Source = "https://github.com/louis-hildebrand/gitsum"
 
 [project.scripts]
