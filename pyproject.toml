@@ -18,9 +18,9 @@ authors = [
 ]
 
 [project.urls]
-source = "https://github.com/louis-hildebrand/gitsum"
-changelog = "https://github.com/louis-hildebrand/gitsum/CHANGELOG.md"
-bug-tracker = "https://github.com/louis-hildebrand/gitsum/issues"
+"Bug Tracker" = "https://github.com/louis-hildebrand/gitsum/issues"
+Changelog = "https://github.com/louis-hildebrand/gitsum/CHANGELOG.md"
+Source = "https://github.com/louis-hildebrand/gitsum"
 
 [project.scripts]
 gitsum = "gitsum.cli:main"
