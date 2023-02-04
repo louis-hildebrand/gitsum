@@ -7,11 +7,20 @@ name = "gitsum"
 version = "1.0.0"
 description = "Summarize the status of multiple Git repositories."
 readme = "README.md"
+license = {file = "LICENSE.txt"}
 requires-python = ">=3.8"
 keywords = ["git"]
 dependencies = [
 	"pygit2"
 ]
+authors = [
+	{name = "Louis Hildebrand", email = "louis.hildebrand@mail.mcgill.ca"}
+]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/louis-hildebrand/gitsum/issues"
+Changelog = "https://github.com/louis-hildebrand/gitsum/blob/main/CHANGELOG.md"
+Source = "https://github.com/louis-hildebrand/gitsum"
 
 [project.scripts]
 gitsum = "gitsum.cli:main"
