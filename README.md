@@ -1,8 +1,8 @@
 # gitsum
-[![Linux build badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/louis-hildebrand/cc9f4d1c6c0152b11b3eb2fe84fc0076/raw/gitsum-Linux.json)](https://github.com/louis-hildebrand/gitsum/actions/workflows/main.yml)
-[![macOS build badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/louis-hildebrand/cc9f4d1c6c0152b11b3eb2fe84fc0076/raw/gitsum-macOS.json)](https://github.com/louis-hildebrand/gitsum/actions/workflows/main.yml)
-[![Windows build badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/louis-hildebrand/cc9f4d1c6c0152b11b3eb2fe84fc0076/raw/gitsum-Windows.json)](https://github.com/louis-hildebrand/gitsum/actions/workflows/main.yml)
-[![Coverage badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/louis-hildebrand/cc9f4d1c6c0152b11b3eb2fe84fc0076/raw/gitsum-coverage.json)](https://github.com/louis-hildebrand/gitsum/actions/workflows/main.yml)
+[![Linux build badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/louis-hildebrand/cc9f4d1c6c0152b11b3eb2fe84fc0076/raw/gitsum-Linux.json)](https://github.com/louis-hildebrand/gitsum/actions/workflows/main-push.yml)
+[![macOS build badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/louis-hildebrand/cc9f4d1c6c0152b11b3eb2fe84fc0076/raw/gitsum-macOS.json)](https://github.com/louis-hildebrand/gitsum/actions/workflows/main-push.yml)
+[![Windows build badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/louis-hildebrand/cc9f4d1c6c0152b11b3eb2fe84fc0076/raw/gitsum-Windows.json)](https://github.com/louis-hildebrand/gitsum/actions/workflows/main-push.yml)
+[![Coverage badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/louis-hildebrand/cc9f4d1c6c0152b11b3eb2fe84fc0076/raw/gitsum-coverage.json)](https://github.com/louis-hildebrand/gitsum/actions/workflows/main-push.yml)
 
 `gitsum` is a command-line tool that provides a summary of multiple Git repositories.
 
