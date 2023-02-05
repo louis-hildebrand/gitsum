@@ -4,6 +4,8 @@ The format of this changelog is based on [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+## [1.1.0] - 2023-02-05
+
 ### Added
 
 - `--version` flag
