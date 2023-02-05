@@ -15,7 +15,7 @@ These steps are based on the guide ["Packaging Python Projects"](https://packagi
 	1. For the username, enter `__token__`.
 	2. For the password, use the TestPyPI token (including the "pypi-" prefix).
 11. Install the package from TestPyPI using `pip install --index-url https://test.pypi.org/simple/ --no-deps gitsum==VERSION`, where `VERSION` is the version you just uploaded.
-12. Try running the command. If there are problems, fix them and repeat the release to TestPyPI before continuing. At the very least, the following points should be checked:
+12. Try running the command. If there are problems, fix them and repeat the release to TestPyPI before continuing. Each time you repeat the instructions, increment the number after `rc` in the version number (to avoid conflicts on TestPyPI). At the very least, the following points should be tested:
 	1. The version number from `gitsum --version` should match the updated value.
 	2. The main success scenario should work for a reasonable variety of repositories.
 13. Drop the "rc" suffix in the version number.
