@@ -29,12 +29,8 @@ class TestCase(unittest.TestCase):
 
     #region Shell commands
 
-    def _run_shell_command(self, args: List[str], ignore_error: bool = False, shell: bool = False, working_dir: str = ".") -> str:
-        if shell:
-            args_str = " ".join(args)
-            result = subprocess.run(args_str, capture_output=True, shell=True, cwd=working_dir)
-        else:
-            result = subprocess.run(args, capture_output=True, cwd=working_dir)
+    def _run_shell_command(self, args: List[str], ignore_error: bool = False, working_dir: str = ".") -> str:
+        result = subprocess.run(args, capture_output=True, cwd=working_dir)
         if not ignore_error:
             error_msg = result.stderr.decode()
             if error_msg:
@@ -293,21 +289,14 @@ class TestCase(unittest.TestCase):
 
     #endregion
 
-    def run_gitsum(self, args: List[str], shell: bool = False, working_dir: str = ".") -> str:
-        """
-        If `shell` is `False`, runs `gitsum.py` and measures the test coverage.
-
-        If `shell` is `True`, runs the platform-specific entry script (`gitsum` or `gitsum.bat`) in the shell without measuring its coverage.
-        """
+    def run_gitsum(self, args: List[str], working_dir: str = ".") -> str:
         root_path = Path(TestCase._GITSUM_REPO_ROOT)
 
-        if shell:
-            command = ["gitsum"]
-        else:
-            gitsum_path = str(root_path.joinpath("src/dev_main.py").absolute())
-            coverage_path = str(root_path.joinpath(".coverage").absolute())
-            command = ["coverage", "run", "--append", "--branch", f"--data-file={coverage_path}", gitsum_path]
-        return self._run_shell_command(command + args, shell=shell, working_dir=working_dir)
+        gitsum_path = str(root_path.joinpath("src/dev_main.py").absolute())
+        coverage_path = str(root_path.joinpath(".coverage").absolute())
+        command = ["coverage", "run", "--append", "--branch", f"--data-file={coverage_path}", gitsum_path]
+
+        return self._run_shell_command(command + args, working_dir=working_dir)
 
     def _make_assert_message(self, actual: str, expected: str) -> str:
         out = "\n" + ("~" * 31) + " OUTPUT " + ("~" * 31) + "\n"

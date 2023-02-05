@@ -1,6 +1,3 @@
-"""
-Simple test case to check that the platform-specific entry scripts (gitsum and gitsum.bat) are working.
-"""
 from inspect import cleandoc
 
 from test.base_test_case import TestCase
@@ -22,5 +19,5 @@ class HelpTests(TestCase):
                                     list files and directories that are not inside a Git
                                     repository and exit"""
         )
-        actual = self.run_gitsum(["--help"], shell=True)
+        actual = self.run_gitsum(["--help"])
         self.assert_lines_equal(expected, actual, regex=True)
