@@ -1,7 +1,7 @@
 # Instructions for Making a Release
 
 1. Create a new branch whose name starts with `release/` (e.g., `release/1.0.0` for version 1.0.0).
-2. Increment the version number. See https://semver.org/. However, add the suffix `rc0` (e.g., release `1.0.0` should become `1.0.0rc0`).
+2. Increment the version number (see https://semver.org/).
 3. Update the changelog
 	1. Label all the issues in this release `published`. While doing so, double-check that all the user-facing ones have been added to the changelog.
 	2. Replace the `[Unreleased]` section with the new version number and the date of the release.

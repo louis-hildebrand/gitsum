@@ -3,7 +3,7 @@
 ## Release to TestPyPI
 These steps are based on the guide ["Packaging Python Projects"](https://packaging.python.org/en/latest/tutorials/packaging-projects/#generating-distribution-archives).
 1. Check out the most recent commit on the release branch.
-2. In `pyproject.toml`, temporarily change the project name to `gitsum-louis-hildebrand`.
+2. In `pyproject.toml`, temporarily change the project name to `gitsum-louis-hildebrand`. In `src/gitsum/__init__.py`, add the suffix `rc0` to the version number (e.g., version `1.0.0` would become `1.1.0rc0`). Do not commit these changes.
 3. Move to the root of the repo.
 4. If you do not yet have a virtual environment, create one using `python -m venv .venv` (using Python 3.8+).
 5. Activate the virtual environment using `.venv/Scripts/activate`.
