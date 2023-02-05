@@ -1,12 +1,5 @@
 # Release instructions
 
-## Before the release
-- [ ] Increment the version number.
-- Update the changelog
-	- [ ] Double-check that all recent user-facing changes have been added to the changelog.
-	- [ ] Replace the `[Unreleased]` section with the new version number and the date of the release.
-	- [ ] Add a new, empty section `[Unreleased]`.
-
 ## Release to TestPyPI
 These steps are based on the guide ["Packaging Python Projects"](https://packaging.python.org/en/latest/tutorials/packaging-projects/#generating-distribution-archives).
 1. Check out the most recent commit on the release branch.
@@ -22,8 +15,11 @@ These steps are based on the guide ["Packaging Python Projects"](https://packagi
 	1. For the username, enter `__token__`.
 	2. For the password, use the TestPyPI token (including the "pypi-" prefix).
 11. Install the package from TestPyPI using `pip install --index-url https://test.pypi.org/simple/ --no-deps gitsum-louis-hildebrand`.
-12. Try running the command. If there are problems, fix them and repeat the release to TestPyPI before continuing.
+12. Try running the command. If there are problems, fix them and repeat the release to TestPyPI before continuing. At the very least, the following points should be checked:
+	1. The version number from `gitsum --version` should match the updated value.
+	2. The main success scenario should work for a reasonable variety of repositories.
 13. Discard the change to the project name.
+14. Drop the "rc" suffix in the version number.
 14. Merge the release branch into main but do not delete the release branch yet.
 15. Check out the `main` branch locally and pull.
 
@@ -44,4 +40,6 @@ These steps are based on the guide ["Packaging Python Projects"](https://packagi
 2. Install the newest version of the package and check that it is working as expected.
 
 ## After the release
-Delete the release branch.
+1. Delete the release branch.
+2. Close the milestone for the release that was just completed.
+3. Open a new milestone for the next release and start assigning issues to it.
