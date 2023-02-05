@@ -4,6 +4,10 @@ The format of this changelog is based on [Keep a Changelog](https://keepachangel
 
 ## [Unreleased]
 
+### Added
+
+- `--version` flag
+
 ### Fixed
 
 - Error when `gitsum` is called from inside a subfolder of a repo
